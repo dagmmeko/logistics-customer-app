@@ -1,0 +1,374 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique", "fieldReference", "fullTextIndex", "fullTextSearch", "jsonProtocol"]
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  userName      String?
+  phoneNumber   String?   @unique
+  email         String    @unique
+  isEmployee    Boolean
+  createdAt     DateTime  @default(now())
+  updateAt      DateTime  @updatedAt
+  deletedAt     DateTime?
+  jwtPassword   String?
+  twoFAPassword String?
+  twoFARequired Boolean   @default(false)
+  Employee      Employee?
+  Customer      Customer?
+
+  @@fulltext([userName, phoneNumber, email])
+}
+
+model Employee {
+  id              Int            @id @default(autoincrement())
+  activityStatus  ActivityStatus
+  hiredDate       DateTime
+  isSuspended     Boolean
+  userId          Int            @unique
+  roleId          Int
+  warehouseId     Int?
+  createdAt       DateTime       @default(now())
+  updateAt        DateTime       @updatedAt
+  deletedAt       DateTime?
+  stationId       Int?
+  isFired         Boolean        @default(false)
+  User            User           @relation(fields: [userId], references: [id])
+  Role            Role           @relation(fields: [roleId], references: [id])
+  selections      Selection[]
+  Dispatches      Dispatch[]
+  Suspensions     Suspended[]
+  fired           Fired[]
+  AssignedTasks   Task[]         @relation("Ticket Assigned To")
+  CreatorTasks    Task[]         @relation("Task Created By")
+  AssingedTickets Ticket[]       @relation("Ticket Assigned To")
+  CreatorTickets  Ticket[]       @relation("Ticket Created By")
+
+  @@index([roleId])
+  @@index([userId])
+  @@index([warehouseId])
+  @@index([stationId])
+}
+
+model Suspended {
+  id           Int       @id @default(autoincrement())
+  employeeId   Int
+  startingDate DateTime
+  endDate      DateTime
+  description  String
+  createdAt    DateTime  @default(now())
+  updateAt     DateTime  @updatedAt
+  deletedAt    DateTime?
+  Employee     Employee  @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model Fired {
+  id          Int       @id @default(autoincrement())
+  employeeId  Int
+  firedDate   DateTime
+  description String
+  createdAt   DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  deletedAt   DateTime?
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model Customer {
+  id              Int           @id @default(autoincrement())
+  userId          Int           @unique
+  customerType    CustomerType?
+  premium         Boolean?
+  physicalAddress String?
+  mapAddress      String?
+  createdAt       DateTime      @default(now())
+  updateAt        DateTime      @updatedAt
+  deletedAt       DateTime?
+  User            User          @relation(fields: [userId], references: [id])
+  SentOrders      Order[]       @relation("order sender")
+  ReceivedOrders  Order[]       @relation("order receiver")
+  Tickets         Ticket[]
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String     @db.VarChar(500)
+  createdAt   DateTime   @default(now())
+  updateAt    DateTime   @updatedAt
+  deletedAt   DateTime?
+  Employees   Employee[]
+  Scopes      Scope[]
+}
+
+model Scope {
+  id     Int    @id @default(autoincrement())
+  name   String
+  roleId Int
+  Role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([roleId])
+}
+
+model Order {
+  id                      Int             @id @default(autoincrement())
+  senderCustomerId        Int
+  receiverCustomerId      Int?
+  receiverName            String?
+  receiverPhoneNumber     String?
+  receiverEmail           String?
+  dropOffTime             DateTime?
+  pickUpTime              DateTime?
+  dropOffPhysicalLocation String
+  dropOffMapLocation      String
+  pickUpPhysicalLocation  String
+  pickUpMapLocation       String
+  packageType             PackageType
+  paymentStatus           Boolean
+  orderStatus             OrderStatus
+  dispatchId              Int?
+  createdAt               DateTime        @default(now())
+  updateAt                DateTime        @updatedAt
+  deletedAt               DateTime?
+  Sender                  Customer        @relation("order sender", fields: [senderCustomerId], references: [id])
+  Receiver                Customer?       @relation("order receiver", fields: [receiverCustomerId], references: [id])
+  Dispatch                Dispatch?       @relation(fields: [dispatchId], references: [id])
+  Tracker                 Tracker?
+  Inventory               Inventory?
+  OrderDispatch           OrderDispatch[]
+
+  @@index([senderCustomerId])
+  @@index([receiverCustomerId])
+  @@index([dispatchId])
+}
+
+model Tracker {
+  id          Int       @id @default(autoincrement())
+  mapLocation String
+  orderId     Int       @unique
+  createdAt   DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  deletedAt   DateTime?
+  Order       Order     @relation(fields: [orderId], references: [id])
+}
+
+model Dispatch {
+  id                 Int             @id @default(autoincrement())
+  assignedEmployeeId Int
+  createdAt          DateTime        @default(now())
+  updateAt           DateTime        @updatedAt
+  deletedAt          DateTime?
+  AssignedTo         Employee        @relation(fields: [assignedEmployeeId], references: [id])
+  Orders             Order[]
+  OrderDispatches    OrderDispatch[]
+
+  @@index([assignedEmployeeId])
+}
+
+model Warehouse {
+  id              Int                       @id @default(autoincrement())
+  name            String
+  mapLocation     String
+  phoneNumber     String
+  capacity        Capacity
+  warehouseStatus Warehouse_warehouseStatus
+  createdAt       DateTime                  @default(now())
+  updateAt        DateTime                  @updatedAt
+  deletedAt       DateTime?
+  regionId        Int
+  selections      Selection[]
+  Inventories     Inventory[]
+  region          Region                    @relation(fields: [regionId], references: [id])
+  Task            Task[]
+  Ticket          Ticket[]
+
+  @@index([regionId])
+  @@fulltext([name, mapLocation, phoneNumber])
+}
+
+model Region {
+  id          Int         @id @default(autoincrement())
+  name        String
+  createdAt   DateTime    @default(now())
+  coordinates Json
+  warehouses  Warehouse[]
+  stations    Station[]
+}
+
+model Station {
+  id               Int         @id @default(autoincrement())
+  name             String
+  mapLocation      String?
+  physicalLocation String?
+  phoneNumber      String
+  createdAt        DateTime    @default(now())
+  updateAt         DateTime    @updatedAt
+  deletedAt        DateTime?
+  regionId         Int
+  selections       Selection[]
+  region           Region?     @relation(fields: [regionId], references: [id])
+
+  @@index([regionId])
+  @@fulltext([name, phoneNumber])
+}
+
+model Selection {
+  id          Int        @id @default(autoincrement())
+  employeeId  Int
+  warehouseId Int?
+  stationId   Int?
+  employee    Employee   @relation(fields: [employeeId], references: [id])
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+  station     Station?   @relation(fields: [stationId], references: [id])
+
+  @@index([warehouseId])
+  @@index([stationId])
+  @@index([employeeId])
+}
+
+model Inventory {
+  id              Int             @id @default(autoincrement())
+  orderId         Int             @unique
+  wareHouseId     Int
+  location        String
+  inventoryStatus InventoryStatus
+  createdAt       DateTime        @default(now())
+  updateAt        DateTime        @updatedAt
+  deletedAt       DateTime?
+  Order           Order           @relation(fields: [orderId], references: [id])
+  Warehouse       Warehouse       @relation(fields: [wareHouseId], references: [id])
+
+  @@index([wareHouseId])
+  @@map("Inventory")
+}
+
+model OrderDispatch {
+  id             Int            @id @default(autoincrement())
+  dispatchId     Int
+  orderId        Int
+  dispatchStatus DispatchStatus
+  createdAt      DateTime       @default(now())
+  updateAt       DateTime       @updatedAt
+  deletedAt      DateTime?
+  lastMile       Boolean        @default(false)
+  toWarehouseId  Int?
+  Order          Order          @relation(fields: [orderId], references: [id])
+  Dispatch       Dispatch       @relation(fields: [dispatchId], references: [id])
+
+  @@index([dispatchId])
+  @@index([orderId])
+}
+
+model Task {
+  id                 Int        @id @default(autoincrement())
+  title              String
+  description        String
+  dueDate            DateTime
+  taskStatus         TaskStatus
+  assignedEmployeeId Int
+  tags               String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime?
+  deletedAt          DateTime?
+  creatorEmployeeId  Int
+  warehouseId        Int?
+  Warehouse          Warehouse? @relation(fields: [warehouseId], references: [id])
+  AssignedTo         Employee   @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
+  CreatedBy          Employee   @relation("Task Created By", fields: [creatorEmployeeId], references: [id])
+
+  @@index([warehouseId])
+  @@index([assignedEmployeeId])
+  @@index([creatorEmployeeId])
+}
+
+model Ticket {
+  id                 Int          @id @default(autoincrement())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime?
+  deletedAt          DateTime?
+  title              String
+  description        String
+  dueDate            DateTime?
+  ticketStatus       TicketStatus
+  assignedEmployeeId Int?
+  tags               String?
+  customerId         Int
+  creatorEmployeeId  Int?
+  warehouseId        Int?
+  Warehouse          Warehouse?   @relation(fields: [warehouseId], references: [id])
+  AssignedTo         Employee?    @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
+  CreatedBy          Employee?    @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
+  Customer           Customer     @relation(fields: [customerId], references: [id])
+
+  @@index([warehouseId])
+  @@index([assignedEmployeeId])
+  @@index([creatorEmployeeId])
+  @@index([customerId])
+}
+
+enum ActivityStatus {
+  ASSIGNED
+  UNASSIGNED
+  SUSPENDED
+  FIRED
+}
+
+enum CustomerType {
+  COMMERCIAL
+  RESIDENTIAL
+}
+
+enum PackageType {
+  PARCEL
+  PALLET
+  CONTAINER
+}
+
+enum OrderStatus {
+  UNCLAIMED
+  CLAIMED
+}
+
+enum TaskStatus {
+  ASSIGNED
+  COMPLETED
+}
+
+enum DispatchStatus {
+  ASSIGNED
+  INPROGRESS
+  COMPLETED
+  RETURNED
+}
+
+enum InventoryStatus {
+  INCOMING
+  ACCEPTED
+  OUTGOING
+}
+
+enum Capacity {
+  LEVEL1
+  LEVEL2
+}
+
+enum TicketStatus {
+  UNASSIGNED
+  ASSIGNED
+  COMPLETED
+}
+
+enum Warehouse_warehouseStatus {
+  ACTIVE
+  INACTIVE
+}
