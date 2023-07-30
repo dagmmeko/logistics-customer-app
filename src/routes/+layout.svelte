@@ -13,6 +13,5 @@
   <Header />
   <slot />
 {/if}
-<slot />
 <SvelteToast />
 <Nprogress />

@@ -2,7 +2,7 @@
   let modalVisible: boolean = false;
 </script>
 
-<header class="flex justify-between h-16 bg-primary p-4">
+<header class="flex w-full justify-between h-16 bg-primary p-4">
   <button on:click={() => (modalVisible = true)}>dp</button>
   <div>bell</div>
 

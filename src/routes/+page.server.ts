@@ -3,7 +3,8 @@ import { redirect } from "@sveltejs/kit";
 export const load = async (event) => {
   const session =
     (await event.locals.getSession()) as EnhancedSessionType | null;
-  if (session?.customerData.customerType) {
+  console.log({ session });
+  if (!session?.customerData.customerType) {
     throw redirect(302, "/customer-information");
   }
   return;
