@@ -255,12 +255,12 @@ model Inventory {
 model OrderDispatch {
   id             Int            @id @default(autoincrement())
   dispatchId     Int
-  orderId        Int
   dispatchStatus DispatchStatus
   createdAt      DateTime       @default(now())
   updateAt       DateTime       @updatedAt
   deletedAt      DateTime?
   lastMile       Boolean        @default(false)
+  orderId        Int
   toWarehouseId  Int?
   Order          Order          @relation(fields: [orderId], references: [id])
   Dispatch       Dispatch       @relation(fields: [dispatchId], references: [id])

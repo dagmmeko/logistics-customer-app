@@ -1,16 +1,78 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import ProfileIcon from "$lib/assets/shared/profile-icon.svg.svelte";
+  import { Map, controls, Marker } from "@beyonk/svelte-mapbox";
+  import Image from "$lib/assets/shared/image.svg.svelte";
   import { superForm } from "sveltekit-superforms/client";
+  import { CustomerType } from "@prisma/client";
+  import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
+
   export let data;
+
+  const { GeolocateControl } = controls;
+
   const { form, enhance, allErrors, constraints } = superForm(
     data.customerInformationForm
   );
+
+  let edit = true;
+
+  let center = [0, 0];
+  let zoom = 7;
+
+  // Split the mapLocation string into its lat and lng components
+  let [mapLat, mapLng] = $form.mapAddress?.split(",") || [];
+
+  // If both lat and lng are present, update the center variable
+  if (mapLat && mapLng) {
+    center = [Number(mapLng.trim()), Number(mapLat.trim())];
+  }
 </script>
 
-<div class="p-12">
-  <ProfileIcon />
-  <form class="grid gap-6">
+<div class="p-12 grid justify-items-center">
+  <Image class="mb-4 h-24 w-24" />
+  {#if !data.session?.customerData.premium}
+    <button
+      class="px-6 h-10 border-[1px] border-secondary text-xs font-semibold text-secondary rounded-xl justify-self-center"
+    >
+      Upgrade to Premium</button
+    >
+  {/if}
+  <form
+    class="grid gap-6 mt-4"
+    method="post"
+    action="?/updateCustomer"
+    use:enhance
+  >
+    <label>
+      <div class="label">User Name</div>
+      <input
+        class="input w-72 max-w-sm"
+        type="text"
+        name="userName"
+        bind:value={$form.userName}
+        {...$constraints.userName}
+      />
+    </label>
+    <label>
+      <div class="label">Email</div>
+      <input
+        class="input max-w-sm"
+        type="text"
+        name="email"
+        bind:value={$form.email}
+        {...$constraints.email}
+      />
+    </label>
+    <label>
+      <div class="label">Phone Number</div>
+      <input
+        class="input max-w-sm"
+        type="text"
+        name="phoneNumber"
+        bind:value={$form.phoneNumber}
+        {...$constraints.phoneNumber}
+      />
+    </label>
     <label>
       <div class="label">Physical Address</div>
       <input
@@ -23,14 +85,35 @@
     </label>
     <label>
       <div class="label">Customer Type</div>
-      <input
-        class="input max-w-sm"
-        type="text"
-        name="customerType"
+      <select
         bind:value={$form.customerType}
-        {...$constraints.customerType}
-      />
+        class="input max-w-sm"
+        name="customerType"
+        on:change={() => (edit = false)}
+      >
+        <option selected disabled>Not selected</option>
+        <option value={CustomerType.COMMERCIAL}> Commercial </option>
+        <option value={CustomerType.RESIDENTIAL}> Residential </option>
+      </select>
     </label>
+
+    <div class="h-56 flex-1">
+      <Map
+        accessToken={PUBLIC_MAPBOX_TOKEN}
+        bind:center
+        bind:zoom
+        on:recentre={async (e) => {
+          center = [
+            // @ts-ignore
+            e.detail.center.lat,
+            // @ts-ignore
+            e.detail.center.lng,
+          ];
+        }}
+      >
+        <GeolocateControl />
+      </Map>
+    </div>
     <label>
       <div class="label">Map Address</div>
       <input
@@ -41,5 +124,10 @@
         {...$constraints.mapAddress}
       />
     </label>
+    <button
+      class="bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-sm text-white"
+    >
+      Submit
+    </button>
   </form>
 </div>

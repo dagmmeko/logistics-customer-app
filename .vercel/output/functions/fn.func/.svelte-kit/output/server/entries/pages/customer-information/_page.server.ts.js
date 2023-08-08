@@ -1,8 +1,7 @@
-import { prisma } from "$lib/utils/prisma.js";
-import { error } from "@sveltejs/kit";
-import { superValidate } from "sveltekit-superforms/server";
+import { p as prisma } from "../../../chunks/prisma.js";
+import { e as error } from "../../../chunks/index.js";
+import { s as superValidate } from "../../../chunks/superValidate.js";
 import { z } from "zod";
-
 const customerInformationSchema = z.object({
   userName: z.string().optional(),
   email: z.string().email().optional(),
@@ -10,52 +9,44 @@ const customerInformationSchema = z.object({
   customerType: z.enum(["RESIDENTIAL", "COMMERCIAL"]).optional(),
   premium: z.boolean().optional(),
   physicalAddress: z.string().optional(),
-  mapAddress: z.string().optional(),
+  mapAddress: z.string().optional()
 });
-
-export type customerInformationType = z.infer<typeof customerInformationSchema>;
-
-export const load = async (event) => {
-  const session =
-    (await event.locals.getSession()) as EnhancedSessionType | null;
+const load = async (event) => {
+  const session = await event.locals.getSession();
   const data = await prisma.user.findFirst({
     where: {
-      id: session?.userData.id,
+      id: session?.userData.id
     },
     include: {
-      Customer: true,
-    },
+      Customer: true
+    }
   });
   if (!data) {
     throw error(500, "user not found");
   }
-
   const customerInformationForm = await superValidate(
     {
-      userName: data.userName ?? undefined,
+      userName: data.userName ?? void 0,
       email: data.email,
-      phoneNumber: data.phoneNumber ?? undefined,
-      customerType: data.Customer?.customerType ?? undefined,
-      premium: data.Customer?.premium ?? undefined,
-      mapAddress: data.Customer?.mapAddress ?? undefined,
-      physicalAddress: data.Customer?.physicalAddress ?? undefined,
-    } satisfies customerInformationType,
+      phoneNumber: data.phoneNumber ?? void 0,
+      customerType: data.Customer?.customerType ?? void 0,
+      premium: data.Customer?.premium ?? void 0,
+      mapAddress: data.Customer?.mapAddress ?? void 0,
+      physicalAddress: data.Customer?.physicalAddress ?? void 0
+    },
     customerInformationSchema
   );
   return {
-    customerInformationForm,
+    customerInformationForm
   };
 };
-
-export let actions = {
+let actions = {
   updateCustomer: async (event) => {
-    const session =
-      (await event.locals.getSession()) as EnhancedSessionType | null;
+    const session = await event.locals.getSession();
     const customerInformationForm = await superValidate(
       event.request,
       customerInformationSchema
     );
-
     const updatedCustomer = await prisma.user.update({
       where: { id: session?.userData.id },
       data: {
@@ -66,13 +57,16 @@ export let actions = {
             customerType: customerInformationForm.data.customerType,
             premium: customerInformationForm.data.premium,
             mapAddress: customerInformationForm.data.mapAddress,
-            physicalAddress: customerInformationForm.data.physicalAddress,
-          },
-        },
-      },
+            physicalAddress: customerInformationForm.data.physicalAddress
+          }
+        }
+      }
     });
-
     console.log({ updatedCustomer });
     return { customerInformationForm };
-  },
+  }
+};
+export {
+  actions,
+  load
 };

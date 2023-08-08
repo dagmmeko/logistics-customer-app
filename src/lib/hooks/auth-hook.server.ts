@@ -28,6 +28,7 @@ interface JwtPayload {
 }
 
 export const authHook = SvelteKitAuth({
+  trustHost: true,
   providers: [
     Google({ clientId: GOOGLE_ID, clientSecret: GOOGLE_SECRET }),
     CredentialsProvider({
@@ -103,7 +104,9 @@ export const authHook = SvelteKitAuth({
               email: params.profile.email,
             },
           });
+          console.log({ findUser });
           if (!findUser) {
+            console.log({ params });
             await prisma.user.create({
               data: {
                 email: params.profile.email,
