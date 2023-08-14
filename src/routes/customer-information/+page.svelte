@@ -5,14 +5,19 @@
   import { superForm } from "sveltekit-superforms/client";
   import { CustomerType } from "@prisma/client";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
+  import { goto } from "$app/navigation";
 
   export let data;
+  export let form;
 
   const { GeolocateControl } = controls;
 
-  const { form, enhance, allErrors, constraints } = superForm(
-    data.customerInformationForm
-  );
+  const {
+    form: customerInformationForm,
+    enhance,
+    allErrors,
+    constraints,
+  } = superForm(data.customerInformationForm);
 
   let edit = true;
 
@@ -20,12 +25,14 @@
   let zoom = 7;
 
   // Split the mapLocation string into its lat and lng components
-  let [mapLat, mapLng] = $form.mapAddress?.split(",") || [];
+  let [mapLat, mapLng] = $customerInformationForm.mapAddress?.split(",") || [];
 
   // If both lat and lng are present, update the center variable
   if (mapLat && mapLng) {
     center = [Number(mapLng.trim()), Number(mapLat.trim())];
   }
+
+  $: form?.updatedCustomer ? goto("/") : null;
 </script>
 
 <div class="p-12 grid justify-items-center">
@@ -49,7 +56,7 @@
         class="input w-72 max-w-sm"
         type="text"
         name="userName"
-        bind:value={$form.userName}
+        bind:value={$customerInformationForm.userName}
         {...$constraints.userName}
       />
     </label>
@@ -59,7 +66,7 @@
         class="input max-w-sm"
         type="text"
         name="email"
-        bind:value={$form.email}
+        bind:value={$customerInformationForm.email}
         {...$constraints.email}
       />
     </label>
@@ -69,7 +76,7 @@
         class="input max-w-sm"
         type="text"
         name="phoneNumber"
-        bind:value={$form.phoneNumber}
+        bind:value={$customerInformationForm.phoneNumber}
         {...$constraints.phoneNumber}
       />
     </label>
@@ -79,14 +86,14 @@
         class="input max-w-sm"
         type="text"
         name="physicalAddress"
-        bind:value={$form.physicalAddress}
+        bind:value={$customerInformationForm.physicalAddress}
         {...$constraints.physicalAddress}
       />
     </label>
     <label>
       <div class="label">Customer Type</div>
       <select
-        bind:value={$form.customerType}
+        bind:value={$customerInformationForm.customerType}
         class="input max-w-sm"
         name="customerType"
         on:change={() => (edit = false)}
@@ -120,7 +127,7 @@
         class="input max-w-sm"
         type="text"
         name="mapAddress"
-        bind:value={$form.mapAddress}
+        bind:value={$customerInformationForm.mapAddress}
         {...$constraints.mapAddress}
       />
     </label>

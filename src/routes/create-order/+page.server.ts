@@ -1,50 +1,101 @@
-import { superValidate } from "sveltekit-superforms/server";
-import { z } from "zod";
+import { prisma } from "$lib/utils/prisma.js";
+import type { PackageType } from "@prisma/client";
+import { fail } from "@sveltejs/kit";
 
-const createOrderSchema = z.object({
-  senderCustomerId: z.number().int(),
-  receiverCustomerId: z.number().int().optional(),
-  receiverName: z.string().optional(),
-  receiverPhoneNumber: z.string().optional(),
-  receiverEmail: z.string().optional(),
-  dropOffTime: z.date().optional(),
-  pickUpTime: z.date().optional(),
-  dropOffPhysicalLocation: z.string(),
-  dropOffMapLocation: z.string(),
-  pickUpPhysicalLocation: z.string(),
-  pickUpMapLocation: z.string(),
-  packageType: z.enum(["PARCEL", "PALLET", "CONTAINER"]).optional(),
-  paymentStatus: z.boolean(),
-  orderStatus: z.enum(["UNCLAIMED", "CLAIMED"]).optional(),
-});
-
-export type CreateOrderSchema = typeof createOrderSchema;
-export type createOrderType = z.infer<typeof createOrderSchema>;
-
-export const load = async (event) => {
-  const session =
-    (await event.locals.getSession()) as EnhancedSessionType | null;
-  const createOrderForm = await superValidate(
-    {
-      senderCustomerId: session?.customerData.id ?? -1,
-      dropOffPhysicalLocation: "",
-      dropOffMapLocation: "",
-      pickUpPhysicalLocation: session?.customerData.physicalAddress ?? "",
-      pickUpMapLocation: session?.customerData.mapAddress ?? "",
-      paymentStatus: false,
-    } satisfies createOrderType,
-    createOrderSchema
-  );
-  return { createOrderForm };
+export const load = async () => {
+  return {};
 };
 export const actions = {
   createOrder: async (event) => {
     const data = await event.request.formData();
-    const name = data.get("pickUpTime");
-    const rtime = data.get("pickUpLocation");
+    const pickUpTime = data.get("pickUpTime");
+    const pickUpLocation = data.get("pickUpLocation");
+    const mapAddress = data.get("mapAddress");
+    const receiverUsername = data.get("receiverUsername");
+    const receiverPhoneNumber = data.get("receiverPhoneNumber");
+    const receiverEmail = data.get("receiverEmail");
+    const inCity = data.get("inCity");
+    const dropOffTime = data.get("dropOffTime");
+    const dropOffLocation = data.get("dropOffLocation");
+    const dropOffMapAddress = data.get("dropOffMapAddress");
+    const packageType = data.get("packageType");
+    const receiverId = data.get("receiverId");
 
-    console.log({ name, rtime });
+    if (
+      typeof pickUpTime !== "string" ||
+      typeof pickUpLocation !== "string" ||
+      typeof mapAddress !== "string" ||
+      typeof dropOffTime !== "string" ||
+      typeof dropOffLocation !== "string" ||
+      typeof inCity !== "string" ||
+      typeof receiverPhoneNumber !== "string" ||
+      typeof receiverUsername !== "string" ||
+      typeof packageType !== "string" ||
+      typeof dropOffMapAddress !== "string" ||
+      typeof receiverEmail !== "string"
+    ) {
+      return;
+    }
 
-    return {};
+    const session =
+      (await event.locals.getSession()) as EnhancedSessionType | null;
+    try {
+      const newOrder = await prisma.order.create({
+        data: {
+          senderCustomerId: Number(session?.customerData.id),
+          dropOffPhysicalLocation: dropOffLocation,
+          dropOffMapLocation: dropOffMapAddress,
+          orderStatus: "UNCLAIMED",
+          packageType: packageType as PackageType,
+          paymentStatus: false,
+          pickUpMapLocation: mapAddress,
+          pickUpPhysicalLocation: pickUpLocation,
+          dropOffTime: new Date(dropOffTime),
+          pickUpTime: new Date(pickUpTime),
+          receiverCustomerId: receiverId ? Number(receiverId) : null,
+          receiverEmail: receiverId ? null : receiverUsername,
+          receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
+          receiverName: receiverId ? null : receiverUsername,
+        },
+      });
+      return { newOrder };
+    } catch (error) {
+      console.log(error as Error);
+      throw fail(500, { errorMessage: "Cant make order!" });
+    }
+  },
+  searchCustomer: async (event) => {
+    const data = await event.request.formData();
+    const query = data.get("customerType");
+    const session =
+      (await event.locals.getSession()) as EnhancedSessionType | null;
+
+    const customerFound = await prisma.customer.findFirst({
+      where: {
+        id: {
+          not: session?.customerData.id,
+        },
+        OR: [
+          {
+            User: {
+              email: query?.toString(),
+              isEmployee: false,
+            },
+          },
+          {
+            User: {
+              phoneNumber: query?.toString(),
+              isEmployee: false,
+            },
+          },
+        ],
+      },
+      include: {
+        User: true,
+      },
+    });
+    // console.log({ customerFound });
+
+    return { customerFound };
   },
 };

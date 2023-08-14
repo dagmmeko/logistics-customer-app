@@ -3,6 +3,9 @@
   import CustomerSupport from "$lib/assets/shared/customer-support.svg.svelte";
   import Image from "$lib/assets/shared/image.svg.svelte";
   import Search from "$lib/assets/shared/search.svg.svelte";
+  import dayJs from "dayjs";
+
+  export let data;
 </script>
 
 <div class="mx-4 max-w-sm">
@@ -48,34 +51,38 @@
     <p>Order History</p>
     <p>See all</p>
   </div>
-  <div class=" bg-[#ECECEC] px-4 py-4 flex items-center gap-2">
-    <Image class="mr-2" />
-    <div>
-      <div class="flex gap-4 mb-2">
-        <p class="text-orderCardText font-bold text-base">
-          Order Id: 12
-          <!-- {orderId} -->
-        </p>
-        <p
-          class="bg-[#F3F3F3] py-1 px-3 text-xs rounded-md font-semibold text-orderCardText"
-        >
-          <!-- {orderStatus.toLowerCase()} --> new
-        </p>
+  {#each data.myOrders as order}
+    <a href="/order-detail/{order.id}">
+      <div class=" bg-[#ECECEC] px-4 py-4 flex items-center gap-2 mt-4">
+        <Image class="mr-2" />
+        <div>
+          <div class="flex gap-4 mb-2">
+            <p class="text-orderCardText font-bold text-base">
+              Order Id: {order.id}
+            </p>
+            <p
+              class="bg-[#F3F3F3] py-1 px-3 text-xs rounded-md font-semibold text-orderCardText"
+            >
+              {order.orderStatus.toLowerCase()}
+            </p>
+          </div>
+          <div class="font-light mb-1">
+            <span class="font-bold">From:</span>
+            {order.Sender.User.userName}
+          </div>
+          <div class="font-light mb-1">
+            <span class="font-bold">To:</span>
+            {order.receiverName
+              ? order.receiverName
+              : order.Receiver?.User.userName}
+          </div>
+          <div class="font-semibold text-xs rounded-md text-gray7">
+            {dayJs().diff(order.createdAt, "minute") < 120
+              ? dayJs().diff(order.createdAt, "minute") + " minutes ago"
+              : dayJs().diff(order.createdAt, "hours") + " hours ago"}
+          </div>
+        </div>
       </div>
-      <div class="font-light mb-1">
-        <span class="font-bold">From:</span>
-        <!-- {sentFrom} --> me
-      </div>
-      <div class="font-light mb-1">
-        <span class="font-bold">To:</span>
-        <!-- {sentFrom} --> you
-      </div>
-      <div class="font-semibold text-xs rounded-md text-gray7">
-        13 days ago
-        <!-- {dayJs().diff(createdAt, 'minute') < 120
-                ? dayJs().diff(createdAt, 'minute') + ' minutes ago'
-                : dayJs().diff(createdAt, 'hours') + ' hours ago'}-->
-      </div>
-    </div>
-  </div>
+    </a>
+  {/each}
 </div>

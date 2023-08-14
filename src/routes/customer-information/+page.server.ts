@@ -72,7 +72,6 @@ export let actions = {
       },
     });
 
-    console.log({ updatedCustomer });
-    return { customerInformationForm };
+    return { customerInformationForm, updatedCustomer };
   },
 };

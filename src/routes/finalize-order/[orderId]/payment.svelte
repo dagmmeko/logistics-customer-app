@@ -3,4 +3,4 @@
   export { className as class };
 </script>
 
-<div class={className}>Order Done</div>
+<div class={className}>Payment</div>

@@ -1,14 +1,13 @@
 <script lang="ts">
-  import type { Writable } from "svelte/store";
-
   import { Map, controls } from "@beyonk/svelte-mapbox";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import Add from "$lib/assets/shared/add.svg.svelte";
   import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
   import { createEventDispatcher } from "svelte";
-  import type { SuperValidated } from "sveltekit-superforms";
-  import type { CreateOrderSchema } from "./+page.server";
+
   const dispatch = createEventDispatcher();
+  let className = "";
+  export { className as class };
 
   const { GeolocateControl } = controls;
   let center = [0, 0];
@@ -21,13 +20,16 @@
     pickUpLocation: string;
     mapLocation: string;
   };
+
+  export let disableInput = false;
+  export let showMap: boolean;
 </script>
 
-<div class="grid gap-4 mt-4 mb-8">
+<div class="{className} grid gap-4 mt-4 mb-8">
   <label>
     <div class="label">Sender's Name</div>
     <input
-      disabled
+      readonly={true}
       bind:value={senderInfo.userName}
       class="input max-w-sm"
       type="text"
@@ -38,7 +40,7 @@
   <label>
     <div class="label">Sender's Phone Number</div>
     <input
-      disabled
+      readonly={true}
       bind:value={senderInfo.phoneNumber}
       class="input max-w-sm"
       type="text"
@@ -49,6 +51,7 @@
   <label>
     <div class="label">Pick up time</div>
     <input
+      disabled={disableInput}
       bind:value={senderInfo.pickUpTime}
       class="input max-w-sm"
       type="datetime-local"
@@ -58,6 +61,7 @@
   <label>
     <div class="label">Pick up location</div>
     <input
+      disabled={disableInput}
       bind:value={senderInfo.pickUpLocation}
       class="input max-w-sm"
       type="text"
@@ -66,26 +70,29 @@
   </label>
 
   <div class="bg-tableHeaderBg p-3 rounded-md">
-    <div class="h-56 flex-1">
-      <Map
-        accessToken={PUBLIC_MAPBOX_TOKEN}
-        bind:center
-        bind:zoom
-        on:recenter={async (e) => {
-          center = [
-            // @ts-ignore
-            e.detail.center.lat,
-            // @ts-ignore
-            e.detail.center.lng,
-          ];
-        }}
-      >
-        <GeolocateControl />
-      </Map>
-    </div>
+    {#if showMap}
+      <div class="h-56 flex-1">
+        <Map
+          accessToken={PUBLIC_MAPBOX_TOKEN}
+          bind:center
+          bind:zoom
+          on:recentre={async (e) => {
+            center = [
+              // @ts-ignore
+              e.detail.center.lat,
+              // @ts-ignore
+              e.detail.center.lng,
+            ];
+          }}
+        >
+          <GeolocateControl />
+        </Map>
+      </div>
+    {/if}
     <label>
       <div class="label">Map Address</div>
       <input
+        disabled={disableInput}
         bind:value={senderInfo.mapLocation}
         class="input max-w-sm"
         type="text"

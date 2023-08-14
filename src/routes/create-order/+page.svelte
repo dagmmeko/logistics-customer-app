@@ -1,10 +1,16 @@
 <script lang="ts">
+  import { enhance } from "$app/forms";
   import { page } from "$app/stores";
+  import { toast } from "@zerodevx/svelte-toast";
   import FinishOrder from "./finish-order.svelte";
-  import PackageType from "./package-type.svelte";
-  import Payment from "./payment.svelte";
+  import type { PackageType } from "@prisma/client";
+  import PackageTypeComponent from "./package-type.svelte";
+  import Payment from "../finalize-order/[orderId]/payment.svelte";
   import ReceiverInfo from "./receiver-info.svelte";
   import SenderInfo from "./sender-info.svelte";
+  import { goto } from "$app/navigation";
+
+  export let form;
 
   let componentsOrder = 1;
   let senderInfo: {
@@ -20,6 +26,19 @@
     pickUpLocation: $page.data.session?.customerData.physicalAddress || "",
     mapLocation: $page.data.session?.customerData.mapAddress || "",
   };
+  let receiversInfo: {
+    userName: string;
+    phoneNumber: string;
+    dropOffTime: Date | null;
+    dropOffLocation: string;
+    dropOffMapLocation: string;
+    inCity: string;
+    receiverEmail: string;
+  };
+  let packageTemp: PackageType;
+
+  $: form?.newOrder ? toast.push("Order Created") : null;
+  $: form?.newOrder ? goto("/") : null;
 </script>
 
 <div class="mx-6 mt-6 max-w-sm">
@@ -75,41 +94,79 @@
   </div>
   <div class="w-full h-[1px] mt-4 bg-gray7" />
 
-  <form method="post" action="?/createOrder">
-    {#if componentsOrder === 1}
-      <SenderInfo
-        bind:senderInfo
-        on:back={() => {
-          if (componentsOrder > 1) {
-            componentsOrder -= 1;
-          }
-        }}
-        on:next={() => {
-          if (componentsOrder >= 1) {
-            componentsOrder += 1;
-          }
-        }}
-      />
-    {:else if componentsOrder === 2}
-      <ReceiverInfo
-        on:back={() => {
-          if (componentsOrder > 1) {
-            componentsOrder -= 1;
-          }
-        }}
-        on:next={() => {
-          if (componentsOrder >= 1) {
-            componentsOrder += 1;
-          }
-        }}
-      />
-    {:else if componentsOrder === 3}
-      <PackageType />
-      <button type="submit"> Submit order </button>
-    {:else if componentsOrder === 4}
-      <Payment />
-    {:else if componentsOrder === 5}
-      <FinishOrder />
-    {/if}
+  <form
+    method="post"
+    action="?/createOrder"
+    use:enhance={({ formData, formElement, cancel }) => {
+      if (
+        formElement.userName.value === "" ||
+        formElement.phoneNumber.value === "" ||
+        formElement.pickUpTime.value === "" ||
+        formElement.pickUpLocation.value === "" ||
+        formElement.mapAddress.value === "" ||
+        formElement.receiverUsername.value === "" ||
+        formElement.receiverPhoneNumber.value === "" ||
+        formElement.inCity.value === "" ||
+        formElement.dropOffTime.value === "" ||
+        formElement.dropOffLocation.value === "" ||
+        formElement.dropOffMapAddress.value === ""
+      ) {
+        toast.push("Please fill out all the required fields");
+        cancel();
+        return;
+      }
+
+      if (!form?.customerFound) {
+        return;
+      }
+      formData.set("receiverId", form.customerFound.id.toString());
+      return;
+    }}
+  >
+    <SenderInfo
+      showMap={componentsOrder === 1}
+      class={componentsOrder === 1 ? "" : "hidden"}
+      bind:senderInfo
+      on:back={() => {
+        if (componentsOrder > 1) {
+          componentsOrder -= 1;
+        }
+      }}
+      on:next={() => {
+        if (componentsOrder >= 1) {
+          componentsOrder += 1;
+        }
+      }}
+    />
+    <ReceiverInfo
+      bind:form
+      bind:receiversInfo
+      showMap={componentsOrder === 2}
+      class={componentsOrder === 2 ? "" : "hidden"}
+      on:back={() => {
+        if (componentsOrder > 1) {
+          componentsOrder -= 1;
+        }
+      }}
+      on:next={() => {
+        if (componentsOrder >= 1) {
+          componentsOrder += 1;
+        }
+      }}
+    />
+    <PackageTypeComponent
+      bind:packageType={packageTemp}
+      class={componentsOrder === 3 ? "" : "hidden"}
+    />
+    <button
+      class="{componentsOrder === 3
+        ? ''
+        : 'hidden'} bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
+      type="submit"
+    >
+      Submit order
+    </button>
+    <Payment class={componentsOrder === 4 ? "" : "hidden"} />
+    <FinishOrder class={componentsOrder === 5 ? "" : "hidden"} />
   </form>
 </div>
