@@ -52,98 +52,94 @@
   let packageTemp: PackageType | null = data.orderDetail?.packageType ?? null;
 </script>
 
-{#if data.orderDetail?.orderStatus === "UNCLAIMED"}
-  <div class="mx-6 mt-6 max-w-sm">
-    <p class="font-bold mb-4">Create Order</p>
-    <div class="flex items-stretch justify-between">
-      <button
-        on:click={() => (componentsOrder = 1)}
-        class="{componentsOrder >= 1
-          ? 'bg-secondary'
-          : 'bg-tableHeaderBg'} rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-      >
-        1
-      </button>
-      <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
-      <button
-        on:click={() => (componentsOrder = 2)}
-        class="{componentsOrder >= 2
-          ? 'bg-secondary'
-          : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-      >
-        2
-      </button>
-      <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
+<div class="mx-6 mt-6 max-w-sm">
+  <p class="font-bold mb-4">Create Order</p>
+  <div class="flex items-stretch justify-between">
+    <button
+      on:click={() => (componentsOrder = 1)}
+      class="{componentsOrder >= 1
+        ? 'bg-secondary'
+        : 'bg-tableHeaderBg'} rounded-full text-gray7 h-8 w-full flex justify-center items-center"
+    >
+      1
+    </button>
+    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
+    <button
+      on:click={() => (componentsOrder = 2)}
+      class="{componentsOrder >= 2
+        ? 'bg-secondary'
+        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
+    >
+      2
+    </button>
+    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
 
-      <button
-        on:click={() => (componentsOrder = 3)}
-        class="{componentsOrder >= 3
-          ? 'bg-secondary'
-          : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-      >
-        3
-      </button>
-      <div class="border-t-4 border-dotted w-full mx-2 h-0 self-center" />
+    <button
+      on:click={() => (componentsOrder = 3)}
+      class="{componentsOrder >= 3
+        ? 'bg-secondary'
+        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
+    >
+      3
+    </button>
+    <div class="border-t-4 border-dotted w-full mx-2 h-0 self-center" />
 
-      <button
-        on:click={() => (componentsOrder = 4)}
-        class="{componentsOrder >= 4
-          ? 'bg-secondary'
-          : 'bg-tableHeaderBg'}  rounded-full text-white h-8 w-full flex justify-center items-center"
-      >
-        4
-      </button>
-      <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
+    <button
+      on:click={() => (componentsOrder = 4)}
+      class="{componentsOrder >= 4
+        ? 'bg-secondary'
+        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
+    >
+      4
+    </button>
+    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
 
-      <button
-        class="{componentsOrder >= 5
-          ? 'bg-secondary'
-          : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-      >
-        5
-      </button>
-    </div>
-    <div class="w-full h-[1px] mt-4 bg-gray7" />
-
-    <SenderInfo
-      disableInput={true}
-      showMap={componentsOrder === 1}
-      class={componentsOrder === 1 ? "" : "hidden"}
-      bind:senderInfo
-      on:back={() => {
-        if (componentsOrder > 1) {
-          componentsOrder -= 1;
-        }
-      }}
-      on:next={() => {
-        if (componentsOrder >= 1) {
-          componentsOrder += 1;
-        }
-      }}
-    />
-    <ReceiverInfo
-      disableInput={true}
-      bind:receiversInfo
-      showMap={componentsOrder === 2}
-      class={componentsOrder === 2 ? "" : "hidden"}
-      on:back={() => {
-        if (componentsOrder > 1) {
-          componentsOrder -= 1;
-        }
-      }}
-      on:next={() => {
-        if (componentsOrder >= 1) {
-          componentsOrder += 1;
-        }
-      }}
-    />
-    <PackageTypeComponent
-      disableInput={true}
-      bind:packageType={packageTemp}
-      class={componentsOrder === 3 ? "" : "hidden"}
-    />
-    <Payment class={componentsOrder === 4 ? "" : "hidden"} />
+    <button
+      class="{componentsOrder >= 5
+        ? 'bg-secondary'
+        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
+    >
+      5
+    </button>
   </div>
-{:else}
-  <div>Order Detail</div>
-{/if}
+  <div class="w-full h-[1px] mt-4 bg-gray7" />
+
+  <SenderInfo
+    disableInput={true}
+    showMap={componentsOrder === 1}
+    class={componentsOrder === 1 ? "" : "hidden"}
+    bind:senderInfo
+    on:back={() => {
+      if (componentsOrder > 1) {
+        componentsOrder -= 1;
+      }
+    }}
+    on:next={() => {
+      if (componentsOrder >= 1) {
+        componentsOrder += 1;
+      }
+    }}
+  />
+  <ReceiverInfo
+    disableInput={true}
+    bind:receiversInfo
+    showMap={componentsOrder === 2}
+    class={componentsOrder === 2 ? "" : "hidden"}
+    on:back={() => {
+      if (componentsOrder > 1) {
+        componentsOrder -= 1;
+      }
+    }}
+    on:next={() => {
+      if (componentsOrder >= 1) {
+        componentsOrder += 1;
+      }
+    }}
+  />
+  <PackageTypeComponent
+    disableInput={true}
+    bind:packageType={packageTemp}
+    class={componentsOrder === 3 ? "" : "hidden"}
+  />
+  <Payment bind:form class={componentsOrder === 4 ? "" : "hidden"} />
+</div>

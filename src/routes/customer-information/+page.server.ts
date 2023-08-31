@@ -1,5 +1,7 @@
+import { S3_BUCKET_NAME } from "$env/static/private";
+import { s3, getFile } from "$lib/utils/aws-file.js";
 import { prisma } from "$lib/utils/prisma.js";
-import { error } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import { superValidate } from "sveltekit-superforms/server";
 import { z } from "zod";
 
@@ -42,7 +44,13 @@ export const load = async (event) => {
     } satisfies customerInformationType,
     customerInformationSchema
   );
+
+  const imgUrl = await getFile(
+    `customerProfilePicture/${session?.customerData.id}`
+  );
+
   return {
+    imgUrl,
     customerInformationForm,
   };
 };
@@ -73,5 +81,41 @@ export let actions = {
     });
 
     return { customerInformationForm, updatedCustomer };
+  },
+  uploadProfilePicture: async (event) => {
+    const data = await event.request.formData();
+    const file = data.get("profilePicture");
+    const key = data.get("profileKey");
+
+    console.log({ file, key });
+
+    if (!(file instanceof File)) {
+      console.log("hererere1");
+
+      return fail(500, { errorMessage: "Issue with the file uploaded." });
+    }
+    if (typeof key !== "string") {
+      console.log("hererere2");
+
+      return fail(500, { errorMessage: "Issue with the key attached." });
+    }
+
+    const buffer = await file.arrayBuffer();
+
+    const send = Buffer.from(buffer);
+
+    try {
+      await s3
+        .putObject({
+          Bucket: S3_BUCKET_NAME,
+          Key: key,
+          Body: send,
+        })
+        .promise();
+    } catch (error) {
+      console.log(error as Error);
+    }
+
+    return;
   },
 };

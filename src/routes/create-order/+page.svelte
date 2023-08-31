@@ -166,7 +166,7 @@
     >
       Submit order
     </button>
-    <Payment class={componentsOrder === 4 ? "" : "hidden"} />
-    <FinishOrder class={componentsOrder === 5 ? "" : "hidden"} />
+    <!-- <Payment class={componentsOrder === 4 ? "" : "hidden"} />
+    <FinishOrder class={componentsOrder === 5 ? "" : "hidden"} /> -->
   </form>
 </div>

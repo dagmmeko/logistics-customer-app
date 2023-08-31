@@ -6,6 +6,8 @@
   import { CustomerType } from "@prisma/client";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import { goto } from "$app/navigation";
+  import Employee from "$lib/assets/shared/employee.svg.svelte";
+  import { enhance } from "$app/forms";
 
   export let data;
   export let form;
@@ -14,7 +16,7 @@
 
   const {
     form: customerInformationForm,
-    enhance,
+    enhance: customerInformationEnhance,
     allErrors,
     constraints,
   } = superForm(data.customerInformationForm);
@@ -36,8 +38,45 @@
 </script>
 
 <div class="p-12 grid justify-items-center">
-  <Image class="mb-4 h-24 w-24" />
-  {#if !data.session?.customerData.premium}
+  <form
+    method="post"
+    action="?/uploadProfilePicture"
+    enctype="multipart/form-data"
+    use:enhance={({ formData }) => {
+      if (!data.session) {
+        console.log("here");
+        return;
+      }
+      formData.set(
+        "profileKey",
+        `customerProfilePicture/${data.session.customerData.id}`
+      );
+    }}
+  >
+    <label>
+      <input
+        class="hidden"
+        type="file"
+        name="profilePicture"
+        accept="image/*"
+        on:change={(e) => {
+          e.currentTarget.form?.requestSubmit();
+        }}
+      />
+      {#if data.imgUrl}
+        <img
+          alt="dp"
+          src={data.imgUrl}
+          class="shadow-xl rounded-full mb-4 h-48 w-48 object-cover"
+        />
+      {:else}
+        <Image class="mb-4 h-24 w-24" />
+      {/if}
+    </label>
+    <!-- <button type="submit"> submit </button> -->
+  </form>
+
+  {#if !data.customerInformationForm.data.premium}
     <button
       class="px-6 h-10 border-[1px] border-secondary text-xs font-semibold text-secondary rounded-xl justify-self-center"
     >
@@ -48,7 +87,7 @@
     class="grid gap-6 mt-4"
     method="post"
     action="?/updateCustomer"
-    use:enhance
+    use:customerInformationEnhance
   >
     <label>
       <div class="label">User Name</div>
