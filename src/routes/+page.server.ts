@@ -27,7 +27,5 @@ export const load = async (event) => {
     },
   });
 
-  console.log({ myOrders });
-
   return { myOrders };
 };

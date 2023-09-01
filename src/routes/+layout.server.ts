@@ -13,7 +13,6 @@ export async function load(event) {
     throw redirect(308, "/auth");
   }
 
-  console.log({ session });
   return {
     session: session,
   };
