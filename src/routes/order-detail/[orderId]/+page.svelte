@@ -10,6 +10,7 @@
   export let data;
   export let form;
 
+  $: console.log({ l: data });
   let componentsOrder = 4;
 
   let senderInfo: {
@@ -49,6 +50,7 @@
       ? data.orderDetail?.Receiver?.User.email ?? ""
       : "",
   };
+
   let packageTemp: PackageType | null = data.orderDetail?.packageType ?? null;
 </script>
 

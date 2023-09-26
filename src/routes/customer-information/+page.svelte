@@ -44,7 +44,6 @@
     enctype="multipart/form-data"
     use:enhance={({ formData }) => {
       if (!data.session) {
-        console.log("here");
         return;
       }
       formData.set(

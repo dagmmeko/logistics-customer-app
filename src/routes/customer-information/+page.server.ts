@@ -87,16 +87,10 @@ export let actions = {
     const file = data.get("profilePicture");
     const key = data.get("profileKey");
 
-    console.log({ file, key });
-
     if (!(file instanceof File)) {
-      console.log("hererere1");
-
       return fail(500, { errorMessage: "Issue with the file uploaded." });
     }
     if (typeof key !== "string") {
-      console.log("hererere2");
-
       return fail(500, { errorMessage: "Issue with the key attached." });
     }
 

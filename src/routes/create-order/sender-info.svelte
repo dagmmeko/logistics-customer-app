@@ -55,6 +55,7 @@
       bind:value={senderInfo.pickUpTime}
       class="input max-w-sm"
       type="datetime-local"
+      min={new Date().toISOString().slice(0, 16)}
       name="pickUpTime"
     />
   </label>

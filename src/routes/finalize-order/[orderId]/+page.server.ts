@@ -1,15 +1,29 @@
 import { prisma } from "$lib/utils/prisma.js";
+import { fail } from "@sveltejs/kit";
 import { randomBytes } from "crypto";
+import { superValidate } from "sveltekit-superforms/server";
 import { z } from "zod";
 
 const addPaymentSchema = z.object({
   email: z.string().email(),
   firstName: z.string(),
   lastName: z.string(),
-  // phoneNumber:
+  phoneNumber: z
+    .string()
+    .regex(
+      new RegExp(/(251\d{10})|(\d{10})|(\d{9})|((?<!0)\d{9})/),
+      "Wrong phone Number Format"
+    ),
 });
+// .refine(
+//   (val) => /(251\d{10})|(\d{10})|(\d{9})|((?<!0)\d{9})/.test(val),
+//   "Wrong Phone Number Format"
+// ),
+export type addPaymentType = z.infer<typeof addPaymentSchema>;
 
 export const load = async (event) => {
+  const session =
+    (await event.locals.getSession()) as EnhancedSessionType | null;
   if (!event.params.orderId) {
     throw new Error("Order Id not found!");
   }
@@ -31,12 +45,38 @@ export const load = async (event) => {
       },
     },
   });
+  const s = session?.userData.phoneNumber;
+  const addPaymentForm = superValidate(
+    {
+      email: session?.userData.email || "",
+      phoneNumber: session?.userData.phoneNumber || "",
+      firstName: session?.userData.userName || "",
+      lastName: session?.userData.userName || "",
+    } satisfies addPaymentType,
+    addPaymentSchema
+  );
 
-  return { orderDetail };
+  return { orderDetail, addPaymentForm };
 };
 
 export let actions = {
   paymentUrl: async (event) => {
+    const addPaymentForm = await superValidate(event.request, addPaymentSchema);
+
+    if (addPaymentForm.errors.phoneNumber) {
+      return fail(500, { addPaymentForm, errorMessage: addPaymentForm.errors });
+    }
+
+    const regex = /(^0)|(\d+)/g;
+
+    const validPhoneNumber = addPaymentForm.data.phoneNumber.replace(
+      regex,
+      (match) => {
+        if (match[0] === "0") return "";
+        return "251" + match;
+      }
+    );
+    console.log({ validPhoneNumber });
     let checkoutUrl;
     const orderDetail = await prisma.order.findFirst({
       where: {
@@ -69,10 +109,10 @@ export let actions = {
           body: JSON.stringify({
             amount: "100",
             currency: "ETB",
-            email: "abebech_bekele@gmail.com",
-            first_name: "Bilen",
-            last_name: "Gizachew",
-            phone_number: "0912345678",
+            email: addPaymentForm.data.email,
+            first_name: addPaymentForm.data.firstName,
+            last_name: addPaymentForm.data.lastName,
+            phone_number: validPhoneNumber,
             tx_ref: randomBytes(12).toString("hex"),
             callback_url: "http://localhost:5173/",
             return_url: "http://localhost:5173/",
@@ -93,8 +133,16 @@ export let actions = {
     } catch (error) {
       console.log("HERE", error as Error);
     }
+    const updateOrder = await prisma.order.update({
+      where: {
+        id: Number(event.params.orderId),
+      },
+      data: {
+        paymentStatus: true,
+      },
+    });
     console.log({ checkoutUrl });
 
-    return { checkoutUrl };
+    return { checkoutUrl, addPaymentForm };
   },
 };

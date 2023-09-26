@@ -2,10 +2,8 @@
   import { enhance } from "$app/forms";
   import { page } from "$app/stores";
   import { toast } from "@zerodevx/svelte-toast";
-  import FinishOrder from "./finish-order.svelte";
   import type { PackageType } from "@prisma/client";
   import PackageTypeComponent from "./package-type.svelte";
-  import Payment from "../finalize-order/[orderId]/payment.svelte";
   import ReceiverInfo from "./receiver-info.svelte";
   import SenderInfo from "./sender-info.svelte";
   import { goto } from "$app/navigation";
@@ -74,7 +72,6 @@
     <div class="border-t-4 border-dotted w-full mx-2 h-0 self-center" />
 
     <button
-      on:click={() => (componentsOrder = 4)}
       class="{componentsOrder >= 4
         ? 'bg-secondary'
         : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
@@ -84,7 +81,6 @@
     <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
 
     <button
-      on:click={() => (componentsOrder = 5)}
       class="{componentsOrder >= 5
         ? 'bg-secondary'
         : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
@@ -166,7 +162,5 @@
     >
       Submit order
     </button>
-    <!-- <Payment class={componentsOrder === 4 ? "" : "hidden"} />
-    <FinishOrder class={componentsOrder === 5 ? "" : "hidden"} /> -->
   </form>
 </div>

@@ -24,8 +24,6 @@ export const load = async (event) => {
     },
   });
 
-  console.log({ o: orderDetail });
-
   if (orderDetail?.orderStatus === "CLAIMED" && !orderDetail.paymentStatus) {
     throw redirect(302, `/finalize-order/${orderDetail.id}`);
   }

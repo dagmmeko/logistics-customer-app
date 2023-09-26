@@ -164,6 +164,7 @@
       bind:value={receiversInfo.dropOffTime}
       class="input max-w-sm"
       type="date"
+      min={new Date().toISOString().split("T")[0]}
       name="dropOffTime"
     />
   </label>

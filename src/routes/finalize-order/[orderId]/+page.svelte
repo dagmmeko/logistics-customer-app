@@ -141,5 +141,5 @@
     bind:packageType={packageTemp}
     class={componentsOrder === 3 ? "" : "hidden"}
   />
-  <Payment bind:form class={componentsOrder === 4 ? "" : "hidden"} />
+  <Payment bind:data bind:form class={componentsOrder === 4 ? "" : "hidden"} />
 </div>

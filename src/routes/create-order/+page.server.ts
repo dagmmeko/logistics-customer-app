@@ -78,13 +78,25 @@ export const actions = {
         OR: [
           {
             User: {
-              email: query?.toString(),
+              email: {
+                contains: query?.toString(),
+              },
               isEmployee: false,
             },
           },
           {
             User: {
-              phoneNumber: query?.toString(),
+              phoneNumber: {
+                contains: query?.toString(),
+              },
+              isEmployee: false,
+            },
+          },
+          {
+            User: {
+              userName: {
+                contains: query?.toString(),
+              },
               isEmployee: false,
             },
           },
@@ -94,7 +106,7 @@ export const actions = {
         User: true,
       },
     });
-    // console.log({ customerFound });
+    console.log({ customerFound });
 
     return { customerFound };
   },

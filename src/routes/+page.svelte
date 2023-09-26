@@ -39,11 +39,13 @@
       <Add /> Price
     </button>
   </div>
-  <button
-    class="bg-black mt-4 flex gap-3 px-12 w-full justify-center items-center rounded-xl h-12 text-white"
-  >
-    <CustomerSupport /> Customer Support
-  </button>
+  <a href="/support">
+    <div
+      class="bg-black mt-4 flex gap-3 px-12 w-full justify-center items-center rounded-xl h-12 text-white"
+    >
+      <CustomerSupport /> Customer Support
+    </div>
+  </a>
 </div>
 
 <div class="mx-4 max-w-sm mt-6">
