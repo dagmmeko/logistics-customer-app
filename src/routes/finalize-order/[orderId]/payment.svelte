@@ -10,7 +10,6 @@
   let className = "";
   export { className as class };
   $: if (form?.checkoutUrl) {
-    // console.log({ f: form.checkoutUrl });
     // @ts-ignores
     location.href = form.checkoutUrl.checkout_url;
   }

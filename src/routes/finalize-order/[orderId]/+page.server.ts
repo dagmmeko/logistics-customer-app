@@ -76,7 +76,6 @@ export let actions = {
         return "251" + match;
       }
     );
-    console.log({ validPhoneNumber });
     let checkoutUrl;
     const orderDetail = await prisma.order.findFirst({
       where: {
@@ -131,7 +130,7 @@ export let actions = {
         checkoutUrl = res.data;
       });
     } catch (error) {
-      console.log("HERE", error as Error);
+      console.log(error as Error);
     }
     const updateOrder = await prisma.order.update({
       where: {
@@ -141,7 +140,6 @@ export let actions = {
         paymentStatus: true,
       },
     });
-    console.log({ checkoutUrl });
 
     return { checkoutUrl, addPaymentForm };
   },

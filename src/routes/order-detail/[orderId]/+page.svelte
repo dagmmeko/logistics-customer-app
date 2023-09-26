@@ -1,147 +1,80 @@
 <script lang="ts">
   import dayjs from "dayjs";
-  import ReceiverInfo from "../../create-order/receiver-info.svelte";
-  import SenderInfo from "../../create-order/sender-info.svelte";
-  import PackageTypeComponent from "../../create-order/package-type.svelte";
-
-  import type { PackageType } from "@prisma/client";
-  import PendingPage from "./pending-page.svelte";
 
   export let data;
-  export let form;
 
-  $: console.log({ l: data });
-  let componentsOrder = 4;
-
-  let senderInfo: {
-    userName: string;
-    phoneNumber: string;
-    pickUpTime: Date | null;
-    pickUpLocation: string;
-    mapLocation: string;
-  } = {
-    userName: data.orderDetail?.Sender.User.userName ?? "",
-    phoneNumber: data.orderDetail?.Sender.User.phoneNumber ?? "",
-    pickUpTime: dayjs(data.orderDetail?.pickUpTime).toDate() ?? "",
-    pickUpLocation: data.orderDetail?.pickUpPhysicalLocation ?? "",
-    mapLocation: data.orderDetail?.pickUpMapLocation ?? "",
-  };
-
-  let receiversInfo: {
-    userName: string | null;
-    phoneNumber: string | null;
-    dropOffTime: Date | null;
-    dropOffLocation: string | null;
-    dropOffMapLocation: string | null;
-    inCity: string | null;
-    receiverEmail: string | null;
-  } = {
-    userName: !data.orderDetail?.receiverName
-      ? data.orderDetail?.Receiver?.User.userName ?? ""
-      : "",
-    phoneNumber: !data.orderDetail?.receiverPhoneNumber
-      ? data.orderDetail?.Receiver?.User.phoneNumber ?? ""
-      : "",
-    dropOffTime: dayjs(data.orderDetail?.dropOffTime).toDate() ?? "",
-    dropOffLocation: data.orderDetail?.dropOffPhysicalLocation ?? "",
-    dropOffMapLocation: data.orderDetail?.dropOffMapLocation ?? "",
-    inCity: "1",
-    receiverEmail: !data.orderDetail?.receiverEmail
-      ? data.orderDetail?.Receiver?.User.email ?? ""
-      : "",
-  };
-
-  let packageTemp: PackageType | null = data.orderDetail?.packageType ?? null;
+  $: console.log({ data });
 </script>
 
-<div class="mx-6 mt-6 max-w-sm">
-  <p class="font-bold mb-4">Create Order</p>
-  <div class="flex items-stretch justify-between">
-    <button
-      on:click={() => (componentsOrder = 1)}
-      class="{componentsOrder >= 1
-        ? 'bg-secondary'
-        : 'bg-tableHeaderBg'} rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-    >
-      1
-    </button>
-    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
-    <button
-      on:click={() => (componentsOrder = 2)}
-      class="{componentsOrder >= 2
-        ? 'bg-secondary'
-        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-    >
-      2
-    </button>
-    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
-
-    <button
-      on:click={() => (componentsOrder = 3)}
-      class="{componentsOrder >= 3
-        ? 'bg-secondary'
-        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-    >
-      3
-    </button>
-    <div class="border-t-4 border-dotted w-full mx-2 h-0 self-center" />
-
-    <button
-      on:click={() => (componentsOrder = 4)}
-      class="{componentsOrder >= 4
-        ? 'bg-complementary'
-        : 'bg-tableHeaderBg'}  rounded-full text-white h-8 w-full flex justify-center items-center"
-    >
-      4
-    </button>
-    <div class="border-t-4 border-dotted w-full h-0 mx-2 self-center" />
-
-    <button
-      class="{componentsOrder >= 5
-        ? 'bg-secondary'
-        : 'bg-tableHeaderBg'}  rounded-full text-gray7 h-8 w-full flex justify-center items-center"
-    >
-      5
-    </button>
+<div class="mx-6 mt-8 mb-16">
+  <div>
+    <p class="text-2xl font-semibold">
+      Order id: <span class="text-secondary"> {data.orderDetail.id} </span>
+    </p>
   </div>
-  <div class="w-full h-[1px] mt-4 bg-gray7" />
+  <div class="h-32 w-full bg-blue-100 my-4">QR</div>
 
-  <SenderInfo
-    disableInput={true}
-    showMap={componentsOrder === 1}
-    class={componentsOrder === 1 ? "" : "hidden"}
-    bind:senderInfo
-    on:back={() => {
-      if (componentsOrder > 1) {
-        componentsOrder -= 1;
-      }
-    }}
-    on:next={() => {
-      if (componentsOrder >= 1) {
-        componentsOrder += 1;
-      }
-    }}
-  />
-  <ReceiverInfo
-    disableInput={true}
-    bind:receiversInfo
-    showMap={componentsOrder === 2}
-    class={componentsOrder === 2 ? "" : "hidden"}
-    on:back={() => {
-      if (componentsOrder > 1) {
-        componentsOrder -= 1;
-      }
-    }}
-    on:next={() => {
-      if (componentsOrder >= 1) {
-        componentsOrder += 1;
-      }
-    }}
-  />
-  <PackageTypeComponent
-    disableInput={true}
-    bind:packageType={packageTemp}
-    class={componentsOrder === 3 ? "" : "hidden"}
-  />
-  <PendingPage class={componentsOrder === 4 ? "" : "hidden"} />
+  {#if data.orderDetail.orderStatus !== "COMPLETED"}
+    <div class="h-32 w-full bg-green-100">Map Track</div>
+    <div>Milestones</div>
+  {/if}
+
+  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+    <span class="font-semibold text-lg">From</span>
+    <div class="text-primary font-light">
+      {data.orderDetail?.Sender.User.userName}
+    </div>
+    <div class="font-light mt-1">{data.orderDetail?.Sender.User.email}</div>
+    <div class="font-light mt-1">
+      {data.orderDetail?.Sender.User.phoneNumber}
+    </div>
+  </div>
+  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+    <span class="font-semibold text-lg">To</span>
+    <div class="text-primary font-light">
+      {data.orderDetail?.receiverName
+        ? data.orderDetail?.receiverName
+        : data.orderDetail.Receiver?.User.userName || ""}
+    </div>
+    <div class="font-light mt-1">
+      {data.orderDetail?.receiverEmail
+        ? data.orderDetail?.receiverEmail
+        : data.orderDetail.Receiver?.User.email || ""}
+    </div>
+    <div class="font-light mt-1">
+      {data.orderDetail?.receiverPhoneNumber
+        ? data.orderDetail?.receiverPhoneNumber
+        : data.orderDetail.Receiver?.User.phoneNumber || ""}
+    </div>
+  </div>
+
+  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+    <span class="font-semibold text-lg">Order Detail</span>
+    <span
+      class="text-sm font-medium text-white mt-1 ml-6 border-secondary border-[1px] bg-secondary/60 px-2 py-1 rounded-md"
+      >{data.orderDetail?.orderStatus}
+    </span>
+    <div class="mt-4">
+      <div class="font-medium text-base">Pick Up</div>
+      <div class="h-32 w-full bg-green-100">
+        {data.orderDetail.pickUpMapLocation}
+      </div>
+      <div class="mt-2">
+        Location :{data.orderDetail.pickUpPhysicalLocation}
+      </div>
+      <div class="mt-2">
+        Time: {dayjs(data.orderDetail.pickUpTime).format("hh:mm a, DD,MMM/YY ")}
+      </div>
+      <div class="font-medium text-base mt-4">Drop Off</div>
+      <div class="h-32 w-full bg-green-100">
+        {data.orderDetail.dropOffMapLocation}
+      </div>
+      <div class="mt-2">
+        Location: {data.orderDetail.dropOffPhysicalLocation}
+      </div>
+      <div class="mt-2">
+        Time: {dayjs(data.orderDetail.dropOffTime).format("DD MMM YY")}
+      </div>
+    </div>
+  </div>
 </div>

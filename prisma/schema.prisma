@@ -40,6 +40,7 @@ model Employee {
   deletedAt       DateTime?
   stationId       Int?
   isFired         Boolean        @default(false)
+  isDriver        Boolean        @default(false)
   User            User           @relation(fields: [userId], references: [id])
   Role            Role           @relation(fields: [roleId], references: [id])
   selections      Selection[]
@@ -101,14 +102,15 @@ model Customer {
 }
 
 model Role {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
-  description String     @db.VarChar(500)
-  createdAt   DateTime   @default(now())
-  updateAt    DateTime   @updatedAt
-  deletedAt   DateTime?
-  Employees   Employee[]
-  Scopes      Scope[]
+  id               Int        @id @default(autoincrement())
+  name             String     @unique
+  description      String     @db.VarChar(500)
+  createdAt        DateTime   @default(now())
+  updateAt         DateTime   @updatedAt
+  deletedAt        DateTime?
+  isWarehouseAdmin Boolean    @default(false)
+  Employees        Employee[]
+  Scopes           Scope[]
 }
 
 model Scope {
@@ -121,7 +123,7 @@ model Scope {
 }
 
 model Order {
-  id                      Int             @id @default(autoincrement())
+  id                      Int               @id @default(autoincrement())
   senderCustomerId        Int
   receiverCustomerId      Int?
   receiverName            String?
@@ -135,14 +137,14 @@ model Order {
   pickUpMapLocation       String
   packageType             PackageType
   paymentStatus           Boolean
-  orderStatus             OrderStatus
+  orderStatus             Order_orderStatus
   dispatchId              Int?
-  createdAt               DateTime        @default(now())
-  updateAt                DateTime        @updatedAt
+  createdAt               DateTime          @default(now())
+  updateAt                DateTime          @updatedAt
   deletedAt               DateTime?
-  Sender                  Customer        @relation("order sender", fields: [senderCustomerId], references: [id])
-  Receiver                Customer?       @relation("order receiver", fields: [receiverCustomerId], references: [id])
-  Dispatch                Dispatch?       @relation(fields: [dispatchId], references: [id])
+  Sender                  Customer          @relation("order sender", fields: [senderCustomerId], references: [id])
+  Receiver                Customer?         @relation("order receiver", fields: [receiverCustomerId], references: [id])
+  Dispatch                Dispatch?         @relation(fields: [dispatchId], references: [id])
   Tracker                 Tracker?
   Inventory               Inventory?
   OrderDispatch           OrderDispatch[]
@@ -176,21 +178,27 @@ model Dispatch {
 }
 
 model Warehouse {
-  id              Int                       @id @default(autoincrement())
-  name            String
-  mapLocation     String
-  phoneNumber     String
-  capacity        Capacity
-  warehouseStatus Warehouse_warehouseStatus
-  createdAt       DateTime                  @default(now())
-  updateAt        DateTime                  @updatedAt
-  deletedAt       DateTime?
-  regionId        Int
-  selections      Selection[]
-  Inventories     Inventory[]
-  region          Region                    @relation(fields: [regionId], references: [id])
-  Task            Task[]
-  Ticket          Ticket[]
+  id                Int                       @id @default(autoincrement())
+  name              String
+  mapLocation       String
+  phoneNumber       String
+  physicalLocation  String
+  capacity          Capacity
+  warehouseStatus   Warehouse_warehouseStatus
+  createdAt         DateTime                  @default(now())
+  updateAt          DateTime                  @updatedAt
+  deletedAt         DateTime?
+  regionId          Int
+  email             String
+  shippingAddress   String
+  attachment        String?
+  workScheduleEnd   DateTime                  @default(now())
+  workScheduleStart DateTime                  @default(now())
+  selections        Selection[]
+  Inventories       Inventory[]
+  region            Region                    @relation(fields: [regionId], references: [id])
+  Task              Task[]
+  Ticket            Ticket[]
 
   @@index([regionId])
   @@fulltext([name, mapLocation, phoneNumber])
@@ -276,7 +284,7 @@ model Task {
   dueDate            DateTime
   taskStatus         TaskStatus
   assignedEmployeeId Int
-  tags               String
+  tags               String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime?
   deletedAt          DateTime?
@@ -292,8 +300,8 @@ model Task {
 }
 
 model Ticket {
-  id                 Int          @id @default(autoincrement())
-  createdAt          DateTime     @default(now())
+  id                 Int                   @id @default(autoincrement())
+  createdAt          DateTime              @default(now())
   updatedAt          DateTime?
   deletedAt          DateTime?
   title              String
@@ -305,15 +313,31 @@ model Ticket {
   customerId         Int
   creatorEmployeeId  Int?
   warehouseId        Int?
-  Warehouse          Warehouse?   @relation(fields: [warehouseId], references: [id])
-  AssignedTo         Employee?    @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
-  CreatedBy          Employee?    @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
-  Customer           Customer     @relation(fields: [customerId], references: [id])
+  resolution         String?
+  ticketSeverity     Ticket_ticketSeverity @default(LOW)
+  ticketFiles        String?
+  Warehouse          Warehouse?            @relation(fields: [warehouseId], references: [id])
+  AssignedTo         Employee?             @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
+  CreatedBy          Employee?             @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
+  Customer           Customer              @relation(fields: [customerId], references: [id])
 
   @@index([warehouseId])
   @@index([assignedEmployeeId])
   @@index([creatorEmployeeId])
   @@index([customerId])
+}
+
+model Vehicles {
+  id          Int                  @id @default(autoincrement())
+  employeeId  Int
+  plateNo     String
+  brand       String
+  vehicleType Vehicles_vehicleType
+  createdAt   DateTime             @default(now())
+  deletedAt   DateTime?
+  updateAt    DateTime?
+
+  @@index([employeeId])
 }
 
 enum ActivityStatus {
@@ -332,11 +356,6 @@ enum PackageType {
   PARCEL
   PALLET
   CONTAINER
-}
-
-enum OrderStatus {
-  UNCLAIMED
-  CLAIMED
 }
 
 enum TaskStatus {
@@ -371,4 +390,23 @@ enum TicketStatus {
 enum Warehouse_warehouseStatus {
   ACTIVE
   INACTIVE
+}
+
+enum Vehicles_vehicleType {
+  BIKE
+  CAR
+  TRUCK
+}
+
+enum Order_orderStatus {
+  UNCLAIMED
+  CLAIMED
+  COMPLETED
+}
+
+enum Ticket_ticketSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }

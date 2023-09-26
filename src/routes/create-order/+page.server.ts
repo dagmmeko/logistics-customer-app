@@ -106,7 +106,6 @@ export const actions = {
         User: true,
       },
     });
-    console.log({ customerFound });
 
     return { customerFound };
   },

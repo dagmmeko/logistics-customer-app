@@ -105,7 +105,6 @@ export const authHook = SvelteKitAuth({
             },
           });
           if (!findUser) {
-            console.log({ params });
             await prisma.user.create({
               data: {
                 email: params.profile.email,

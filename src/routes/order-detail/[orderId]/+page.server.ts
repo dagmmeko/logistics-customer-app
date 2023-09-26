@@ -6,6 +6,7 @@ export const load = async (event) => {
     throw new Error("Order Id not found!");
   }
 
+  console.log({ e: event.params.orderId });
   const orderDetail = await prisma.order.findFirst({
     where: {
       id: Number(event.params.orderId),
@@ -24,9 +25,13 @@ export const load = async (event) => {
     },
   });
 
-  if (orderDetail?.orderStatus === "CLAIMED" && !orderDetail.paymentStatus) {
-    throw redirect(302, `/finalize-order/${orderDetail.id}`);
+  if (orderDetail?.orderStatus === "UNCLAIMED" || !orderDetail?.paymentStatus) {
+    console.log("here");
+    throw redirect(302, `/finalize-order/${orderDetail?.id}`);
   }
 
+  console.log({
+    orderDetail,
+  });
   return { orderDetail };
 };
