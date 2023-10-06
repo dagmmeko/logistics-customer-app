@@ -29,3 +29,17 @@ export const load = async (event) => {
 
   return { myOrders };
 };
+
+export let actions = {
+  searchOrder: async (event) => {
+    const data = await event.request.formData();
+    const query = data.get("orderId");
+
+    const orderFound = await prisma.order.findFirst({
+      where: { id: Number(query), deletedAt: null },
+    });
+    console.log({ orderFound });
+
+    return { orderFound };
+  },
+};

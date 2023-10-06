@@ -26,12 +26,8 @@ export const load = async (event) => {
   });
 
   if (orderDetail?.orderStatus === "UNCLAIMED" || !orderDetail?.paymentStatus) {
-    console.log("here");
     throw redirect(302, `/finalize-order/${orderDetail?.id}`);
   }
 
-  console.log({
-    orderDetail,
-  });
   return { orderDetail };
 };

@@ -39,30 +39,32 @@ export const actions = {
 
     const session =
       (await event.locals.getSession()) as EnhancedSessionType | null;
-    try {
-      const newOrder = await prisma.order.create({
-        data: {
-          senderCustomerId: Number(session?.customerData.id),
-          dropOffPhysicalLocation: dropOffLocation,
-          dropOffMapLocation: dropOffMapAddress,
-          orderStatus: "UNCLAIMED",
-          packageType: packageType as PackageType,
-          paymentStatus: false,
-          pickUpMapLocation: mapAddress,
-          pickUpPhysicalLocation: pickUpLocation,
-          dropOffTime: new Date(dropOffTime),
-          pickUpTime: new Date(pickUpTime),
-          receiverCustomerId: receiverId ? Number(receiverId) : null,
-          receiverEmail: receiverId ? null : receiverUsername,
-          receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
-          receiverName: receiverId ? null : receiverUsername,
-        },
-      });
-      return { newOrder };
-    } catch (error) {
-      console.log(error as Error);
-      throw fail(500, { errorMessage: "Cant make order!" });
-    }
+
+    console.log({ mapAddress });
+    // try {
+    //   const newOrder = await prisma.order.create({
+    //     data: {
+    //       senderCustomerId: Number(session?.customerData.id),
+    //       dropOffPhysicalLocation: dropOffLocation,
+    //       dropOffMapLocation: dropOffMapAddress,
+    //       orderStatus: "UNCLAIMED",
+    //       packageType: packageType as PackageType,
+    //       paymentStatus: false,
+    //       pickUpMapLocation: mapAddress,
+    //       pickUpPhysicalLocation: pickUpLocation,
+    //       dropOffTime: new Date(dropOffTime),
+    //       pickUpTime: new Date(pickUpTime),
+    //       receiverCustomerId: receiverId ? Number(receiverId) : null,
+    //       receiverEmail: receiverId ? null : receiverUsername,
+    //       receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
+    //       receiverName: receiverId ? null : receiverUsername,
+    //     },
+    //   });
+    //   return { newOrder };
+    // } catch (error) {
+    //   console.log(error as Error);
+    //   throw fail(500, { errorMessage: "Cant make order!" });
+    // }
   },
   searchCustomer: async (event) => {
     const data = await event.request.formData();

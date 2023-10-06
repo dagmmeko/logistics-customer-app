@@ -1,17 +1,32 @@
 <script lang="ts">
-  import { Map, controls } from "@beyonk/svelte-mapbox";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import Add from "$lib/assets/shared/add.svg.svelte";
   import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
   import { createEventDispatcher } from "svelte";
+  import Map from "$lib/components/map.svelte";
+  import { browser } from "$app/environment";
+  let lat: number;
+  let lng: number;
+  if (browser) {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          lat = position.coords.latitude;
+          lng = position.coords.longitude;
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        }
+      );
+    } else {
+      // Geolocation is not supported by the browser
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }
 
   const dispatch = createEventDispatcher();
   let className = "";
   export { className as class };
-
-  const { GeolocateControl } = controls;
-  let center = [0, 0];
-  let zoom = 7;
 
   export let senderInfo: {
     userName: string;
@@ -73,28 +88,16 @@
   <div class="bg-tableHeaderBg p-3 rounded-md">
     {#if showMap}
       <div class="h-56 flex-1">
-        <Map
-          accessToken={PUBLIC_MAPBOX_TOKEN}
-          bind:center
-          bind:zoom
-          on:recentre={async (e) => {
-            center = [
-              // @ts-ignore
-              e.detail.center.lat,
-              // @ts-ignore
-              e.detail.center.lng,
-            ];
-          }}
-        >
-          <GeolocateControl />
-        </Map>
+        {#if lat && lng}
+          <Map center={[lng, lat]} zoom={10} />
+        {/if}
       </div>
     {/if}
     <label>
       <div class="label">Map Address</div>
       <input
         disabled={disableInput}
-        bind:value={senderInfo.mapLocation}
+        value={`${lng},${lat}`}
         class="input max-w-sm"
         type="text"
         name="mapAddress"
