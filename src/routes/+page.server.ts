@@ -32,6 +32,9 @@ export const load = async (event) => {
         },
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return { myOrders };

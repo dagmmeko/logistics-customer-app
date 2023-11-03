@@ -1,5 +1,5 @@
 import { prisma } from "$lib/utils/prisma.js";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { randomBytes } from "crypto";
 import { superValidate } from "sveltekit-superforms/server";
 import { z } from "zod";
@@ -45,7 +45,6 @@ export const load = async (event) => {
       },
     },
   });
-  const s = session?.userData.phoneNumber;
   const addPaymentForm = superValidate(
     {
       email: session?.userData.email || "",
@@ -55,6 +54,35 @@ export const load = async (event) => {
     } satisfies addPaymentType,
     addPaymentSchema
   );
+
+  let verifyPayment;
+  const verifyPaymentResponse = await fetch(
+    `https://api.chapa.co/v1/transaction/verify/${orderDetail?.paymentRef}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer CHASECK_TEST-XnClzXRLcCLdg7cpBpuVMhPPgeTd7xNo",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  await verifyPaymentResponse.json().then((res) => {
+    verifyPayment = res.data;
+  });
+
+  // @ts-ignore
+  if (verifyPayment && verifyPayment.status === "success") {
+    const updateOrder = await prisma.order.update({
+      where: {
+        id: Number(event.params.orderId),
+      },
+      data: {
+        paymentStatus: true,
+      },
+    });
+    throw redirect(302, `/order-detail/${orderDetail?.id}`);
+  } else {
+  }
 
   return { orderDetail, addPaymentForm };
 };
@@ -96,6 +124,7 @@ export let actions = {
     });
 
     try {
+      const tx_ref = randomBytes(10).toString("hex");
       const checkoutUrlRequest = await fetch(
         "https://api.chapa.co/v1/transaction/initialize",
         {
@@ -112,7 +141,7 @@ export let actions = {
             first_name: addPaymentForm.data.firstName,
             last_name: addPaymentForm.data.lastName,
             phone_number: validPhoneNumber,
-            tx_ref: randomBytes(12).toString("hex"),
+            tx_ref: tx_ref,
             callback_url: "http://localhost:5173/",
             return_url: "http://localhost:5173/",
             "customization[title]":
@@ -129,17 +158,20 @@ export let actions = {
       await checkoutUrlRequest.json().then((res) => {
         checkoutUrl = res.data;
       });
+
+      const updateOrder = await prisma.order.update({
+        where: {
+          id: Number(event.params.orderId),
+        },
+        data: {
+          paymentRef: tx_ref,
+        },
+      });
     } catch (error) {
       console.log(error as Error);
     }
-    const updateOrder = await prisma.order.update({
-      where: {
-        id: Number(event.params.orderId),
-      },
-      data: {
-        paymentStatus: true,
-      },
-    });
+
+    console.log({ checkoutUrl });
 
     return { checkoutUrl, addPaymentForm };
   },

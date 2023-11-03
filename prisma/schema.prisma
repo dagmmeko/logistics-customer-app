@@ -160,6 +160,7 @@ model Order {
   pickUpMapLocation       String
   packageType             PackageType
   paymentStatus           Boolean
+  paymentRef              String?
   orderStatus             Order_orderStatus
   dispatchId              Int?
   createdAt               DateTime          @default(now())
@@ -249,6 +250,8 @@ model DailySchedule {
   warehouseId Int
   isHoliday   Boolean   @default(false)
   Warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([warehouseId])
 }
 
 model DailyScheduleEmployee {
@@ -259,6 +262,8 @@ model DailyScheduleEmployee {
   isHoliday  Boolean  @default(false)
   employeeId Int
   Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
 }
 
 model DailyScheduleStation {
@@ -269,6 +274,8 @@ model DailyScheduleStation {
   stationId Int
   isHoliday Boolean @default(false)
   Station   Station @relation(fields: [stationId], references: [id])
+
+  @@index([stationId])
 }
 
 model Region {

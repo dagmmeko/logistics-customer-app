@@ -143,5 +143,17 @@
     bind:packageType={packageTemp}
     class={componentsOrder === 3 ? "" : "hidden"}
   />
-  <Payment bind:data bind:form class={componentsOrder === 4 ? "" : "hidden"} />
+
+  {#if data.orderDetail?.orderStatus === "CLAIMED" && !data.orderDetail?.paymentStatus}
+    <Payment
+      bind:data
+      bind:form
+      class={componentsOrder === 4 ? "" : "hidden"}
+    />
+  {:else}
+    <p class=" text-2xl font-light text-center mt-10">
+      Please wait while your order is being processed. <br /> <br /> Your order
+      id is : {data.orderDetail?.id}
+    </p>
+  {/if}
 </div>

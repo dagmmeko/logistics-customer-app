@@ -28,7 +28,7 @@
     />
   </div>
 
-  {#if data.orderDetail.orderStatus !== "COMPLETED"}
+  {#if data.orderDetail?.orderStatus !== "COMPLETED"}
     <div class="h-56 w-[352px] flex-1">
       <div class="h-56 flex-1">
         <Map center={[38, 9]} zoom={10} />
@@ -37,20 +37,22 @@
 
     <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
       <p>Milestones</p>
-      {#each data.orderDetail.orderMilestone as milestone}
-        <div class="grid">
-          <label>
-            <input
-              disabled
-              value={milestone.isCompleted}
-              type="radio"
-              bind:group={radio}
-              class="mr-2"
-              name="milestones"
-            />{milestone.description}
-          </label>
-        </div>
-      {/each}
+      {#if data.orderDetail}
+        {#each data.orderDetail.orderMilestone as milestone}
+          <div class="grid">
+            <label>
+              <input
+                disabled
+                value={milestone.isCompleted}
+                type="radio"
+                bind:group={radio}
+                class="mr-2"
+                name="milestones"
+              />{milestone.description}
+            </label>
+          </div>
+        {/each}
+      {/if}
     </div>
   {/if}
 
@@ -59,17 +61,17 @@
     <div class="text-primary font-light">
       {data.orderDetail?.receiverName
         ? data.orderDetail?.receiverName
-        : data.orderDetail.Receiver?.User.userName || ""}
+        : data.orderDetail?.Receiver?.User.userName || ""}
     </div>
     <div class="font-light mt-1">
       {data.orderDetail?.receiverEmail
         ? data.orderDetail?.receiverEmail
-        : data.orderDetail.Receiver?.User.email || ""}
+        : data.orderDetail?.Receiver?.User.email || ""}
     </div>
     <div class="font-light mt-1">
       {data.orderDetail?.receiverPhoneNumber
         ? data.orderDetail?.receiverPhoneNumber
-        : data.orderDetail.Receiver?.User.phoneNumber || ""}
+        : data.orderDetail?.Receiver?.User.phoneNumber || ""}
     </div>
   </div>
 
@@ -82,23 +84,25 @@
     <div class="mt-4">
       <div class="font-medium text-base">Pick Up</div>
       <div class="h-32 w-full bg-green-100">
-        {data.orderDetail.pickUpMapLocation}
+        {data.orderDetail?.pickUpMapLocation}
       </div>
       <div class="mt-2">
-        Location :{data.orderDetail.pickUpPhysicalLocation}
+        Location :{data.orderDetail?.pickUpPhysicalLocation}
       </div>
       <div class="mt-2">
-        Time: {dayjs(data.orderDetail.pickUpTime).format("hh:mm a, DD,MMM/YY ")}
+        Time: {dayjs(data.orderDetail?.pickUpTime).format(
+          "hh:mm a, DD,MMM/YY "
+        )}
       </div>
       <div class="font-medium text-base mt-4">Drop Off</div>
       <div class="h-32 w-full bg-green-100">
-        {data.orderDetail.dropOffMapLocation}
+        {data.orderDetail?.dropOffMapLocation}
       </div>
       <div class="mt-2">
-        Location: {data.orderDetail.dropOffPhysicalLocation}
+        Location: {data.orderDetail?.dropOffPhysicalLocation}
       </div>
       <div class="mt-2">
-        Time: {dayjs(data.orderDetail.dropOffTime).format("DD MMM YY")}
+        Time: {dayjs(data.orderDetail?.dropOffTime).format("DD MMM YY")}
       </div>
     </div>
   </div>

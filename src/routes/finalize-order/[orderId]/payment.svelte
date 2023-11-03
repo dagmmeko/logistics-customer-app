@@ -4,6 +4,7 @@
   import { page } from "$app/stores";
   import { superForm } from "sveltekit-superforms/client";
   import type { PageData } from "./$types";
+  import { goto } from "$app/navigation";
 
   export let form: ActionData;
   export let data: PageData;
@@ -25,11 +26,7 @@
 </script>
 
 <div class={className}>
-  {#if form}
-    <div class={className}>{form.checkoutUrl}</div>
-  {/if}
-
-  <form use:enhance method="post" action="?/paymentUrl" class=" mt-6">
+  <form use:enhance method="post" action="?/paymentUrl" class=" my-6">
     <p class="mb-2 text-lg">Please Enter Your Payment Information</p>
     <p class="mb-4 text-sm font-bold text-red-800">
       Make sure the payment detail is correct.
@@ -80,7 +77,7 @@
       </label>
 
       <button
-        class="{className}bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
+        class="{className}bg-secondary flex mt-4 justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
       >
         Continue to Payment
       </button>
