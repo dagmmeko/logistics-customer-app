@@ -6,6 +6,7 @@
   import Search from "$lib/assets/shared/search.svg.svelte";
   import dayJs from "dayjs";
   import { clickOutside } from "$lib/utils/click-outside.js";
+  import { toast } from "@zerodevx/svelte-toast";
 
   export let data;
   export let form;
@@ -15,7 +16,7 @@
   $: form?.orderFound ? (searchDisplay = true) : (searchDisplay = false);
 </script>
 
-<div class="w-full grid items-center justify-center">
+<div class=" w-full grid items-center justify-center">
   <div class="mx-4 max-w-sm">
     <form
       method="post"
@@ -70,6 +71,9 @@
         </div>
       </a>
       <button
+        on:click={() => {
+          toast.push("Coming soon");
+        }}
         class="bg-[#B29603] flex gap-3 px-12 justify-center items-center rounded-xl h-12 max-w-sm text-white"
       >
         <Add /> Price
@@ -86,33 +90,45 @@
 
   <div class="mx-4 max-w-sm mt-6">
     <div class="flex justify-between mb-">
-      <p>Order History</p>
-      <p>See all</p>
+      <p class="text-xl font-normal">Order History</p>
+      <p class="text-sm font-light underline">See all</p>
     </div>
     {#each data.myOrders as order}
       <a href="/order-detail/{order.id}">
-        <div class=" bg-[#ECECEC] px-4 py-4 flex items-center gap-2 mt-4">
-          <Image class="mr-2" />
+        <div
+          class=" {order.receiverCustomerId === data.session?.customerData.id
+            ? 'bg-secondary/30'
+            : 'bg-white'} px-4 py-4 flex items-center shadow-md gap-2 my-4 rounded-md"
+        >
+          <!-- <Image class="mr-2" /> -->
           <div>
             <div class="flex gap-4 mb-2">
               <p class="text-orderCardText font-bold text-base">
                 Order Id: {order.id}
               </p>
+
               <p
                 class="bg-[#F3F3F3] py-1 px-3 text-xs rounded-md font-semibold text-orderCardText"
               >
                 {order.orderStatus.toLowerCase()}
               </p>
             </div>
-            <div class="font-light mb-1">
+            <div class="font-medium mb-1">
               <span class="font-bold">From:</span>
               {order.Sender.User.userName}
+              <span class="text-sm font-light italic">
+                {`(${order.pickUpPhysicalLocation})`}
+              </span>
             </div>
-            <div class="font-light mb-1">
+            <div class="font-medium mb-1">
               <span class="font-bold">To:</span>
               {order.receiverName
                 ? order.receiverName
                 : order.Receiver?.User.userName}
+
+              <span class="text-sm font-light italic">
+                {`(${order.dropOffPhysicalLocation})`}
+              </span>
             </div>
             <div class="font-semibold text-xs rounded-md text-gray7">
               {dayJs().diff(order.createdAt, "minute") < 120

@@ -102,8 +102,10 @@ export const authHook = SvelteKitAuth({
           const findUser = await prisma.user.findFirst({
             where: {
               email: params.profile.email,
+              isEmployee: false,
             },
           });
+          console.log({ findUser });
           if (!findUser) {
             await prisma.user.create({
               data: {
@@ -116,7 +118,7 @@ export const authHook = SvelteKitAuth({
               },
             });
             return true;
-          } else if (findUser && !findUser.isEmployee) {
+          } else if (findUser) {
             return true;
           }
         } catch (error) {

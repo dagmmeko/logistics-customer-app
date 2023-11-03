@@ -5,8 +5,11 @@
   import { createEventDispatcher } from "svelte";
   import Map from "$lib/components/map.svelte";
   import { browser } from "$app/environment";
+  import { clickOutside } from "$lib/utils/click-outside";
   let lat: number;
   let lng: number;
+
+  let dateInput: any;
   if (browser) {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -46,7 +49,7 @@
     <input
       readonly={true}
       bind:value={senderInfo.userName}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="userName"
     />
@@ -57,7 +60,7 @@
     <input
       readonly={true}
       bind:value={senderInfo.phoneNumber}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="phoneNumber"
     />
@@ -68,8 +71,12 @@
     <input
       disabled={disableInput}
       bind:value={senderInfo.pickUpTime}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="datetime-local"
+      bind:this={dateInput}
+      on:click={() => {
+        dateInput && dateInput.showPicker();
+      }}
       min={new Date().toISOString().slice(0, 16)}
       name="pickUpTime"
     />
@@ -79,7 +86,7 @@
     <input
       disabled={disableInput}
       bind:value={senderInfo.pickUpLocation}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="pickUpLocation"
     />
@@ -89,7 +96,14 @@
     {#if showMap}
       <div class="h-56 flex-1">
         {#if lat && lng}
-          <Map center={[lng, lat]} zoom={10} />
+          <Map
+            center={[lng, lat]}
+            zoom={10}
+            on:location={(e) => {
+              lat = e.detail.lat;
+              lng = e.detail.lng;
+            }}
+          />
         {/if}
       </div>
     {/if}
@@ -98,14 +112,14 @@
       <input
         disabled={disableInput}
         value={`${lng},${lat}`}
-        class="input max-w-sm"
+        class="input max-w-md"
         type="text"
         name="mapAddress"
       />
     </label>
   </div>
 
-  <div class="flex justify-between mt-4 max-w-sm">
+  <div class="flex gap-10 mt-4 max-w-md">
     <button
       type="button"
       on:click|preventDefault={() => dispatch("back")}

@@ -1,34 +1,59 @@
 <script lang="ts">
+  import Map from "$lib/components/map.svelte";
   import dayjs from "dayjs";
+  import Barcode from "svelte-barcode";
 
   export let data;
 
-  $: console.log({ data });
+  let radio: number;
 </script>
 
-<div class="mx-6 mt-8 mb-16">
+<div class=" mt-8 mb-16 grid justify-center">
   <div>
-    <p class="text-2xl font-semibold">
-      Order id: <span class="text-secondary"> {data.orderDetail.id} </span>
-    </p>
+    <Barcode
+      value={data.orderDetail?.id}
+      elementTag={"canvas"}
+      options={{
+        format: "CODE128",
+        width: 4,
+        height: 100,
+        text: "Order ",
+        textAlign: "center",
+        textPosition: "bottom",
+        textMargin: 2,
+        fontSize: 20,
+        background: "#ffffff",
+        lineColor: "#000000",
+      }}
+    />
   </div>
-  <div class="h-32 w-full bg-blue-100 my-4">QR</div>
 
   {#if data.orderDetail.orderStatus !== "COMPLETED"}
-    <div class="h-32 w-full bg-green-100">Map Track</div>
-    <div>Milestones</div>
+    <div class="h-56 w-[352px] flex-1">
+      <div class="h-56 flex-1">
+        <Map center={[38, 9]} zoom={10} />
+      </div>
+    </div>
+
+    <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+      <p>Milestones</p>
+      {#each data.orderDetail.orderMilestone as milestone}
+        <div class="grid">
+          <label>
+            <input
+              disabled
+              value={milestone.isCompleted}
+              type="radio"
+              bind:group={radio}
+              class="mr-2"
+              name="milestones"
+            />{milestone.description}
+          </label>
+        </div>
+      {/each}
+    </div>
   {/if}
 
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <span class="font-semibold text-lg">From</span>
-    <div class="text-primary font-light">
-      {data.orderDetail?.Sender.User.userName}
-    </div>
-    <div class="font-light mt-1">{data.orderDetail?.Sender.User.email}</div>
-    <div class="font-light mt-1">
-      {data.orderDetail?.Sender.User.phoneNumber}
-    </div>
-  </div>
   <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
     <span class="font-semibold text-lg">To</span>
     <div class="text-primary font-light">

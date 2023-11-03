@@ -27,6 +27,7 @@
   };
 
   let receiversInfo: {
+    id: Number;
     userName: string | null;
     phoneNumber: string | null;
     dropOffTime: Date | null;
@@ -35,6 +36,7 @@
     inCity: string | null;
     receiverEmail: string | null;
   } = {
+    id: data.orderDetail?.Receiver?.id ?? 0,
     userName: !data.orderDetail?.receiverName
       ? data.orderDetail?.Receiver?.User.userName ?? ""
       : "",

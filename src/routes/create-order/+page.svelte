@@ -25,6 +25,7 @@
     mapLocation: $page.data.session?.customerData.mapAddress || "",
   };
   let receiversInfo: {
+    id: Number;
     userName: string;
     phoneNumber: string;
     dropOffTime: Date | null;
@@ -39,7 +40,7 @@
   $: form?.newOrder ? goto("/") : null;
 </script>
 
-<div class="mx-6 mt-6 max-w-sm">
+<div class=" mt-6 w-full grid items-center justify-center">
   <p class="font-bold mb-4">Create Order</p>
   <div class="flex items-stretch justify-between">
     <button
@@ -115,7 +116,7 @@
       if (!form?.customerFound) {
         return;
       }
-      formData.set("receiverId", form.customerFound.id.toString());
+      formData.set("receiverId", receiversInfo.id.toString());
       return;
     }}
   >
@@ -157,7 +158,7 @@
     <button
       class="{componentsOrder === 3
         ? ''
-        : 'hidden'} bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
+        : 'hidden'} bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-md w-full text-white"
       type="submit"
     >
       Submit order

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Map, controls } from "@beyonk/svelte-mapbox";
+  import { controls } from "@beyonk/svelte-mapbox";
   import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
   import Add from "$lib/assets/shared/add.svg.svelte";
   import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
@@ -7,17 +7,26 @@
   import Search from "$lib/assets/shared/search.svg.svelte";
   import type { ActionData } from "./$types";
   import { enhance } from "$app/forms";
+  import Map from "$lib/components/map.svelte";
+  import { browser } from "$app/environment";
+  import { custom } from "zod";
+  let dateInput: any;
+
   let className = "";
+  let lat: number;
+  let lng: number;
+
   export { className as class };
   const dispatch = createEventDispatcher();
   const { GeolocateControl } = controls;
   let center = [0, 0];
   let zoom = 7;
-  let radio = 0;
+  let radio: number;
   export let showMap: boolean;
   export let form: ActionData | undefined = undefined;
 
   export let receiversInfo: {
+    id: Number;
     userName: string | null;
     phoneNumber: string | null;
     dropOffTime: Date | null;
@@ -26,13 +35,14 @@
     inCity: string | null;
     receiverEmail: string | null;
   } = {
-    userName: form?.customerFound?.User.userName ?? null,
-    phoneNumber: form?.customerFound?.User.phoneNumber ?? null,
-    dropOffLocation: form?.customerFound?.physicalAddress ?? null,
-    dropOffMapLocation: form?.customerFound?.mapAddress ?? null,
+    id: 0,
+    userName: null,
+    phoneNumber: null,
     dropOffTime: null,
+    dropOffLocation: null,
+    dropOffMapLocation: null,
     inCity: null,
-    receiverEmail: form?.customerFound?.User.email ?? null,
+    receiverEmail: null,
   };
 
   let searchResultVisible: boolean = false;
@@ -41,7 +51,7 @@
   // $: console.log({ receiversInfo });
 </script>
 
-<div class="{className} grid gap-4 mt-4 mb-8">
+<div class="{className}  grid gap-4 mt-4 mb-8">
   {#if !disableInput}
     <form
       method="post"
@@ -70,44 +80,48 @@
     </form>
   {/if}
   {#if form?.customerFound && searchResultVisible}
-    <button
-      type="button"
-      on:click|preventDefault={() => {
-        receiversInfo = {
-          userName: form?.customerFound?.User.userName ?? null,
-          phoneNumber: form?.customerFound?.User.phoneNumber ?? null,
-          dropOffLocation: form?.customerFound?.physicalAddress ?? null,
-          dropOffMapLocation: form?.customerFound?.mapAddress ?? null,
-          dropOffTime: null,
-          inCity: receiversInfo.inCity || "",
-          receiverEmail: form?.customerFound?.User.email ?? null,
-        };
-        searchResultVisible = false;
-      }}
-    >
-      <div
-        class="w-full shadow-xl border-2 -mt-5 bg-white border-tableHeaderBg rounded-xl px-4 py-2"
+    {#each form?.customerFound as customer}
+      <button
+        class="my-2"
+        type="button"
+        on:click|preventDefault={() => {
+          receiversInfo = {
+            id: customer.id,
+            userName: customer.User.userName ?? null,
+            phoneNumber: customer.User.phoneNumber ?? null,
+            dropOffLocation: customer.physicalAddress ?? null,
+            dropOffMapLocation: customer.mapAddress ?? null,
+            dropOffTime: null,
+            inCity: receiversInfo.inCity || "",
+            receiverEmail: customer.User.email ?? null,
+          };
+          searchResultVisible = false;
+        }}
       >
-        <span class="flex font-bold text-sm text-secondary mb-1">
-          Select this user
-        </span>
-        <span class="flex text-xs"
-          ><p class="font-semibold pr-2">Name</p>
-          {form?.customerFound.User.userName}</span
+        <div
+          class="w-full shadow-xl border-2 -mt-5 bg-white border-tableHeaderBg rounded-xl px-4 py-2"
         >
-        <span class="flex text-xs">
-          <p class="font-semibold pr-2">Email</p>
-          {form?.customerFound.User.email}
-        </span>
-      </div>
-    </button>
+          <span class="flex font-bold text-sm text-secondary mb-1">
+            Select this user
+          </span>
+          <span class="flex text-xs"
+            ><p class="font-semibold pr-2">Name</p>
+            {customer.User.userName}</span
+          >
+          <span class="flex text-xs">
+            <p class="font-semibold pr-2">Email</p>
+            {customer.User.email}
+          </span>
+        </div>
+      </button>
+    {/each}
   {/if}
   <label>
     <div class="label">Receiver's Name</div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.userName}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="receiverUsername"
     />
@@ -117,7 +131,7 @@
     <input
       disabled={disableInput}
       bind:value={receiversInfo.phoneNumber}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="receiverPhoneNumber"
     />
@@ -127,7 +141,7 @@
     <input
       disabled={disableInput}
       bind:value={receiversInfo.receiverEmail}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="receiverEmail"
     />
@@ -136,7 +150,7 @@
     <label>
       <input
         disabled={disableInput}
-        value={1}
+        value={0}
         type="radio"
         bind:group={radio}
         class="mr-2"
@@ -162,7 +176,11 @@
     <input
       disabled={disableInput}
       bind:value={receiversInfo.dropOffTime}
-      class="input max-w-sm"
+      bind:this={dateInput}
+      on:click={() => {
+        dateInput && dateInput.showPicker();
+      }}
+      class="input max-w-md"
       type="date"
       min={new Date().toISOString().split("T")[0]}
       name="dropOffTime"
@@ -174,7 +192,7 @@
     <input
       disabled={disableInput}
       bind:value={receiversInfo.dropOffLocation}
-      class="input max-w-sm"
+      class="input max-w-md"
       type="text"
       name="dropOffLocation"
     />
@@ -182,34 +200,24 @@
 
   <div class="h-56 flex-1">
     {#if showMap}
-      <Map
-        accessToken={PUBLIC_MAPBOX_TOKEN}
-        bind:center
-        bind:zoom
-        on:recentre={async (e) => {
-          center = [
-            // @ts-ignore
-            e.detail.center.lat,
-            // @ts-ignore
-            e.detail.center.lng,
-          ];
-        }}
-      >
-        <GeolocateControl />
-      </Map>
+      <div class="h-56 flex-1">
+        {#if lat && lng}
+          <Map center={[lng, lat]} zoom={10} />
+        {/if}
+      </div>
     {/if}
   </div>
   <label>
     <div class="label">Map Address</div>
     <input
       disabled={disableInput}
-      bind:value={receiversInfo.dropOffMapLocation}
-      class="input max-w-sm"
+      value={`${lng},${lat}`}
+      class="input max-w-md"
       type="text"
       name="dropOffMapAddress"
     />
   </label>
-  <div class="flex justify-between mt-4 max-w-sm">
+  <div class="flex gap-10 mt-4 max-w-md">
     <button
       on:click|preventDefault={() => dispatch("back")}
       class="bg-secondary flex gap-3 px-12 justify-center items-center rounded-xl h-12 text-white"

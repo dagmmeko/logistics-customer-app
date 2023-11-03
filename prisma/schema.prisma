@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["extendedWhereUnique", "fieldReference", "fullTextIndex", "fullTextSearch", "jsonProtocol"]
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
 }
 
 datasource db {
@@ -28,41 +28,57 @@ model User {
 }
 
 model Employee {
-  id                  Int                     @id @default(autoincrement())
-  activityStatus      ActivityStatus
-  hiredDate           DateTime
-  isSuspended         Boolean
-  userId              Int                     @unique
-  roleId              Int
-  warehouseId         Int?
-  createdAt           DateTime                @default(now())
-  updateAt            DateTime                @updatedAt
-  deletedAt           DateTime?
-  stationId           Int?
-  isFired             Boolean                 @default(false)
-  isDriver            Boolean                 @default(false)
-  address             String
-  dateOfBirth         DateTime
-  department          String
-  employmentStartDate DateTime
-  jobTitle            String
-  staffIdNumber       String
-  employeeStatus      Employee_employeeStatus @default(Full_Time)
-  User                User                    @relation(fields: [userId], references: [id])
-  Role                Role                    @relation(fields: [roleId], references: [id])
-  selections          Selection[]
-  Dispatches          Dispatch[]
-  Suspensions         Suspended[]
-  fired               Fired[]
-  AssignedTasks       Task[]                  @relation("Ticket Assigned To")
-  CreatorTasks        Task[]                  @relation("Task Created By")
-  AssingedTickets     Ticket[]                @relation("Ticket Assigned To")
-  CreatorTickets      Ticket[]                @relation("Ticket Created By")
+  id                    Int                     @id @default(autoincrement())
+  activityStatus        Employee_activityStatus
+  hiredDate             DateTime
+  isSuspended           Boolean
+  userId                Int                     @unique
+  roleId                Int
+  warehouseId           Int?
+  createdAt             DateTime                @default(now())
+  updateAt              DateTime                @updatedAt
+  deletedAt             DateTime?
+  stationId             Int?
+  isFired               Boolean                 @default(false)
+  isDriver              Boolean                 @default(false)
+  address               String
+  dateOfBirth           DateTime?
+  department            String
+  employmentStartDate   DateTime?
+  jobTitle              String
+  staffIdNumber         String
+  employeeStatus        EmployeeStatus          @default(Full_Time)
+  User                  User                    @relation(fields: [userId], references: [id])
+  Role                  Role                    @relation(fields: [roleId], references: [id])
+  selections            Selection[]
+  dailyScheduleEmployee DailyScheduleEmployee[]
+  Dispatches            Dispatch[]
+  Suspensions           Suspended[]
+  fired                 Fired[]
+  AssignedTasks         Task[]                  @relation("Ticket Assigned To")
+  CreatorTasks          Task[]                  @relation("Task Created By")
+  AssingedTickets       Ticket[]                @relation("Ticket Assigned To")
+  CreatorTickets        Ticket[]                @relation("Ticket Created By")
+  Vehicles              Vehicles[]
 
   @@index([roleId])
   @@index([userId])
   @@index([warehouseId])
   @@index([stationId])
+}
+
+model Vehicles {
+  id          Int                  @id @default(autoincrement())
+  employeeId  Int
+  plateNo     String
+  brand       String
+  vehicleType Vehicles_vehicleType
+  createdAt   DateTime             @default(now())
+  deletedAt   DateTime?
+  updateAt    DateTime?            @updatedAt
+  Employee    Employee             @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
 }
 
 model Suspended {
@@ -149,6 +165,8 @@ model Order {
   createdAt               DateTime          @default(now())
   updateAt                DateTime          @updatedAt
   deletedAt               DateTime?
+  isInCity                Boolean           @default(false)
+  orderMilestone          OrderMilestone[]
   Sender                  Customer          @relation("order sender", fields: [senderCustomerId], references: [id])
   Receiver                Customer?         @relation("order receiver", fields: [receiverCustomerId], references: [id])
   Dispatch                Dispatch?         @relation(fields: [dispatchId], references: [id])
@@ -159,6 +177,19 @@ model Order {
   @@index([senderCustomerId])
   @@index([receiverCustomerId])
   @@index([dispatchId])
+}
+
+model OrderMilestone {
+  id          Int       @id @default(autoincrement())
+  orderId     Int
+  description String
+  createdAt   DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  deletedAt   DateTime?
+  isCompleted Boolean   @default(false)
+  Order       Order     @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
 }
 
 model Tracker {
@@ -200,13 +231,44 @@ model Warehouse {
   shippingAddress  String
   attachment       String?
   selections       Selection[]
-  Inventories      Inventory[]
+  inventories      Inventory[]
   region           Region                    @relation(fields: [regionId], references: [id])
   Task             Task[]
   Ticket           Ticket[]
+  dailySchedules   DailySchedule[]
 
   @@index([regionId])
   @@fulltext([name, mapLocation, phoneNumber])
+}
+
+model DailySchedule {
+  id          Int       @id @default(autoincrement())
+  day         String
+  startTime   String
+  endTime     String
+  warehouseId Int
+  isHoliday   Boolean   @default(false)
+  Warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+}
+
+model DailyScheduleEmployee {
+  id         Int      @id @default(autoincrement())
+  day        String
+  startTime  String
+  endTime    String
+  isHoliday  Boolean  @default(false)
+  employeeId Int
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+}
+
+model DailyScheduleStation {
+  id        Int     @id @default(autoincrement())
+  day       String
+  startTime String
+  endTime   String
+  stationId Int
+  isHoliday Boolean @default(false)
+  Station   Station @relation(fields: [stationId], references: [id])
 }
 
 model Region {
@@ -219,20 +281,21 @@ model Region {
 }
 
 model Station {
-  id               Int               @id @default(autoincrement())
-  name             String
-  mapLocation      String?
-  physicalLocation String?
-  phoneNumber      String
-  createdAt        DateTime          @default(now())
-  updateAt         DateTime          @updatedAt
-  deletedAt        DateTime?
-  regionId         Int
-  category         Station_category?
-  description      String?
-  email            String
-  selections       Selection[]
-  region           Region?           @relation(fields: [regionId], references: [id])
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  mapLocation           String?
+  physicalLocation      String?
+  phoneNumber           String
+  createdAt             DateTime               @default(now())
+  updateAt              DateTime               @updatedAt
+  deletedAt             DateTime?
+  regionId              Int
+  category              Category?
+  description           String?
+  email                 String
+  selections            Selection[]
+  dailySchedulesStation DailyScheduleStation[]
+  region                Region?                @relation(fields: [regionId], references: [id])
 
   @@index([regionId])
   @@fulltext([name, phoneNumber])
@@ -286,22 +349,23 @@ model OrderDispatch {
 }
 
 model Task {
-  id                 Int               @id @default(autoincrement())
+  id                 Int            @id @default(autoincrement())
   title              String
   description        String
   dueDate            DateTime
   taskStatus         TaskStatus
   assignedEmployeeId Int
   tags               String?
-  createdAt          DateTime          @default(now())
+  createdAt          DateTime       @default(now())
   updatedAt          DateTime?
   deletedAt          DateTime?
   creatorEmployeeId  Int
   warehouseId        Int?
-  taskSeverity       Task_taskSeverity @default(LOW)
-  Warehouse          Warehouse?        @relation(fields: [warehouseId], references: [id])
-  AssignedTo         Employee          @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
-  CreatedBy          Employee          @relation("Task Created By", fields: [creatorEmployeeId], references: [id])
+  taskSeverity       SeverityStatus
+  Warehouse          Warehouse?     @relation(fields: [warehouseId], references: [id])
+  AssignedTo         Employee       @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
+  CreatedBy          Employee       @relation("Task Created By", fields: [creatorEmployeeId], references: [id])
+  TaskFile           TaskFile[]
 
   @@index([warehouseId])
   @@index([assignedEmployeeId])
@@ -309,8 +373,8 @@ model Task {
 }
 
 model Ticket {
-  id                 Int                   @id @default(autoincrement())
-  createdAt          DateTime              @default(now())
+  id                 Int            @id @default(autoincrement())
+  createdAt          DateTime       @default(now())
   updatedAt          DateTime?
   deletedAt          DateTime?
   title              String
@@ -323,12 +387,13 @@ model Ticket {
   creatorEmployeeId  Int?
   warehouseId        Int?
   resolution         String?
-  ticketSeverity     Ticket_ticketSeverity @default(LOW)
+  ticketSeverity     SeverityStatus @default(LOW)
   ticketFiles        String?
-  Warehouse          Warehouse?            @relation(fields: [warehouseId], references: [id])
-  AssignedTo         Employee?             @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
-  CreatedBy          Employee?             @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
-  Customer           Customer              @relation(fields: [customerId], references: [id])
+  Warehouse          Warehouse?     @relation(fields: [warehouseId], references: [id])
+  AssignedTo         Employee?      @relation("Ticket Assigned To", fields: [assignedEmployeeId], references: [id])
+  CreatedBy          Employee?      @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
+  Customer           Customer       @relation(fields: [customerId], references: [id])
+  TicketFile         TicketFile[]
 
   @@index([warehouseId])
   @@index([assignedEmployeeId])
@@ -336,50 +401,15 @@ model Ticket {
   @@index([customerId])
 }
 
-model Vehicles {
-  id          Int                  @id @default(autoincrement())
-  employeeId  Int
-  plateNo     String
-  brand       String
-  vehicleType Vehicles_vehicleType
-  createdAt   DateTime             @default(now())
-  deletedAt   DateTime?
-  updateAt    DateTime?
-
-  @@index([employeeId])
-}
-
-model DailySchedule {
-  id          Int    @id @default(autoincrement())
-  day         String
-  startTime   String
-  endTime     String
-  warehouseId Int
-}
-
-model DailyScheduleStation {
-  id        Int    @id @default(autoincrement())
-  day       String
-  startTime String
-  endTime   String
-  stationId Int
-}
-
 model File {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
-  deletedAt DateTime?
-  fileName  String
-  key       String
-}
-
-model Holiday {
-  id          Int      @id @default(autoincrement())
-  holidayDate DateTime
-  warehouseId Int
-  name        String
-  stationId   Int      @default(555)
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime?
+  deletedAt  DateTime?
+  fileName   String
+  key        String
+  TicketFile TicketFile[]
+  TaskFile   TaskFile?
 }
 
 model TaskFile {
@@ -389,9 +419,11 @@ model TaskFile {
   deletedAt DateTime?
   fileId    Int       @unique
   taskId    Int
+  Ticket    Task      @relation(fields: [taskId], references: [id])
+  File      File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
-  @@index([fileId])
   @@index([taskId])
+  @@index([fileId])
 }
 
 model TicketFile {
@@ -401,16 +433,25 @@ model TicketFile {
   deletedAt DateTime?
   fileId    Int       @unique
   ticketId  Int
+  Ticket    Ticket    @relation(fields: [ticketId], references: [id])
+  File      File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
-  @@index([fileId])
   @@index([ticketId])
+  @@index([fileId])
 }
 
-enum ActivityStatus {
-  ASSIGNED
-  UNASSIGNED
-  SUSPENDED
-  FIRED
+enum EmployeeStatus {
+  Full_Time
+  Part_Time
+  Temporary
+}
+
+enum Category {
+  Regional_Offices
+  Headquarters_Administrative_Office
+  Drop_off_Pick_up_Points
+  Third_Party_Warehouses
+  Others
 }
 
 enum CustomerType {
@@ -458,6 +499,13 @@ enum Warehouse_warehouseStatus {
   INACTIVE
 }
 
+enum SeverityStatus {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 enum Vehicles_vehicleType {
   BIKE
   CAR
@@ -470,30 +518,9 @@ enum Order_orderStatus {
   COMPLETED
 }
 
-enum Ticket_ticketSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum Station_category {
-  Regional_Offices
-  Headquarters_Administrative_Office
-  Drop_off_Pick_up_Points
-  Third_Party_Warehouses
-  Others
-}
-
-enum Task_taskSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum Employee_employeeStatus {
-  Full_Time
-  Part_Time
-  Temporary
+enum Employee_activityStatus {
+  ASSIGNED
+  UNASSIGNED
+  SUSPENDED
+  TERMINATED
 }

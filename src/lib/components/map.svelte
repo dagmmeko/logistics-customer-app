@@ -1,5 +1,8 @@
 <script lang="ts">
   import { Map, Geocoder, Marker, controls } from "@beyonk/svelte-mapbox";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   const { NavigationControl, ScaleControl } = controls;
 
@@ -11,6 +14,8 @@
 
   let mapComponent: any;
   $: mapComponent?.flyTo?.({ center: [lng, lat] });
+
+  $: lng && lat && dispatch("location", { lng, lat });
 </script>
 
 <div class=" w-full h-full">
@@ -25,6 +30,7 @@
     }}
     on:drag={(e) => {
       // @ts-ignore
+
       center = [e.detail.center.lng, e.detail.center.lat];
     }}
   >

@@ -1,6 +1,7 @@
 import { prisma } from "$lib/utils/prisma.js";
 import type { PackageType } from "@prisma/client";
 import { fail } from "@sveltejs/kit";
+import * as turf from "@turf/turf";
 
 export const load = async () => {
   return {};
@@ -37,34 +38,95 @@ export const actions = {
       return;
     }
 
+    let inbound = false;
+
     const session =
       (await event.locals.getSession()) as EnhancedSessionType | null;
 
-    console.log({ mapAddress });
-    // try {
-    //   const newOrder = await prisma.order.create({
-    //     data: {
-    //       senderCustomerId: Number(session?.customerData.id),
-    //       dropOffPhysicalLocation: dropOffLocation,
-    //       dropOffMapLocation: dropOffMapAddress,
-    //       orderStatus: "UNCLAIMED",
-    //       packageType: packageType as PackageType,
-    //       paymentStatus: false,
-    //       pickUpMapLocation: mapAddress,
-    //       pickUpPhysicalLocation: pickUpLocation,
-    //       dropOffTime: new Date(dropOffTime),
-    //       pickUpTime: new Date(pickUpTime),
-    //       receiverCustomerId: receiverId ? Number(receiverId) : null,
-    //       receiverEmail: receiverId ? null : receiverUsername,
-    //       receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
-    //       receiverName: receiverId ? null : receiverUsername,
-    //     },
-    //   });
-    //   return { newOrder };
-    // } catch (error) {
-    //   console.log(error as Error);
-    //   throw fail(500, { errorMessage: "Cant make order!" });
-    // }
+    const warehouses = await prisma.warehouse.findMany({
+      where: {
+        warehouseStatus: "ACTIVE",
+      },
+      include: {
+        region: true,
+      },
+    });
+
+    let isInside;
+    let orderMilestones: string[] = [];
+    if (inCity === "0") {
+      inbound = true;
+      orderMilestones = [
+        "Pick up from Sender",
+        "Take to drop off",
+        "Deliver Item",
+      ];
+    } else {
+      const orderLocation = mapAddress.split(",");
+
+      warehouses.forEach((warehouse) => {
+        const point = turf.point([
+          Number(orderLocation[0]),
+          Number(orderLocation[1]),
+        ]);
+        console.log({ l: warehouse.region.coordinates });
+
+        if (Array(warehouse.region.coordinates).length >= 4) {
+          const poly = turf.polygon([
+            warehouse.region.coordinates as turf.Position[],
+          ]);
+          isInside = turf.booleanPointInPolygon(point, poly);
+
+          if (isInside) {
+            orderMilestones = [
+              "Pick up from Sender",
+              "Take to " + warehouse.name + " warehouse",
+              "Deliver Item",
+            ];
+          }
+        } else {
+        }
+      });
+    }
+
+    try {
+      const newOrder = await prisma.order.create({
+        data: {
+          senderCustomerId: Number(session?.customerData.id),
+          dropOffPhysicalLocation: dropOffLocation,
+          dropOffMapLocation: dropOffMapAddress,
+          orderStatus: "UNCLAIMED",
+          packageType: packageType as PackageType,
+          paymentStatus: false,
+          pickUpMapLocation: mapAddress,
+          pickUpPhysicalLocation: pickUpLocation,
+          dropOffTime: new Date(dropOffTime),
+          pickUpTime: new Date(pickUpTime),
+          receiverCustomerId: receiverId ? Number(receiverId) : null,
+          receiverEmail: receiverId ? null : receiverUsername,
+          receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
+          receiverName: receiverId ? null : receiverUsername,
+          isInCity: inbound,
+          orderMilestone: {
+            createMany: {
+              data: [
+                ...orderMilestones?.map((milestone) => {
+                  return {
+                    description: milestone,
+                  };
+                }),
+              ],
+            },
+          },
+        },
+      });
+
+      console.log({ newOrder });
+      return { newOrder };
+    } catch (error) {
+      console.log(error as Error);
+      throw fail(500, { errorMessage: "Cant make order!" });
+    }
   },
   searchCustomer: async (event) => {
     const data = await event.request.formData();
@@ -72,7 +134,7 @@ export const actions = {
     const session =
       (await event.locals.getSession()) as EnhancedSessionType | null;
 
-    const customerFound = await prisma.customer.findFirst({
+    const customerFound = await prisma.customer.findMany({
       where: {
         id: {
           not: session?.customerData.id,
@@ -108,7 +170,6 @@ export const actions = {
         User: true,
       },
     });
-
     return { customerFound };
   },
 };

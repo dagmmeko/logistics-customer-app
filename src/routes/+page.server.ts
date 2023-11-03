@@ -11,7 +11,14 @@ export const load = async (event) => {
 
   const myOrders = await prisma.order.findMany({
     where: {
-      senderCustomerId: session.customerData.id,
+      OR: [
+        {
+          senderCustomerId: session.customerData.id,
+        },
+        {
+          receiverCustomerId: session.customerData.id,
+        },
+      ],
     },
     include: {
       Sender: {
@@ -27,6 +34,8 @@ export const load = async (event) => {
     },
   });
 
+  console.log({ myOrders });
+
   return { myOrders };
 };
 
@@ -38,7 +47,6 @@ export let actions = {
     const orderFound = await prisma.order.findFirst({
       where: { id: Number(query), deletedAt: null },
     });
-    console.log({ orderFound });
 
     return { orderFound };
   },
