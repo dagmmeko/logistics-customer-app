@@ -15,10 +15,12 @@
   </a>
   <div class="my-4">
     {#each data.tickets as ticket}
-      <div class="bg-tableHeaderBg w-auto rounded-sm p-4 my-2 grid">
-        <div class="flex gap-4">
-          <span class=" font-semibold"> {ticket.title}</span>
-          <span class="text-xs font-medium text-black/60 mt-1">
+      <div
+        class="bg-tableHeaderBg/50 shadow-sm w-auto rounded-md p-4 my-2 grid"
+      >
+        <div class="flex items-center justify-between gap-4">
+          <span class=" text-xl font-medium"> {ticket.title}</span>
+          <span class="text-[10px] font-medium text-black/60 mt-1">
             {ticket.ticketStatus}
           </span>
         </div>
@@ -33,7 +35,7 @@
             ? "Due Date: " + dayjs(ticket.dueDate).format("DD MM YY")
             : ""}
         </p>
-        <p class="mt-1">{ticket.description}</p>
+        <p class="mt-1 line-clamp-3">{ticket.description}</p>
       </div>
     {/each}
   </div>

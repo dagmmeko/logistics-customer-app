@@ -96,7 +96,7 @@
         <div
           class=" {order.receiverCustomerId === data.session?.customerData.id
             ? 'bg-secondary/30'
-            : 'bg-white'} px-4 py-4 shadow-md gap-2 my-4 rounded-md"
+            : 'bg-tableHeaderBg/50'} px-4 py-4 shadow-md gap-2 my-4 rounded-md"
         >
           <!-- <Image class="mr-2" /> -->
           <p class="text-sm font-light">
@@ -136,7 +136,9 @@
             <div class="font-semibold text-xs rounded-md text-gray7">
               {dayJs().diff(order.createdAt, "minute") < 120
                 ? dayJs().diff(order.createdAt, "minute") + " minutes ago"
-                : dayJs().diff(order.createdAt, "hours") + " hours ago"}
+                : dayJs().diff(order.createdAt, "hours") < 24
+                ? dayJs().diff(order.createdAt, "hours") + " hours ago"
+                : dayJs().diff(order.createdAt, "days") + " days ago"}
             </div>
           </div>
         </div>

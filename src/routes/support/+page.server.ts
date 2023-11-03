@@ -18,6 +18,9 @@ export const load = async (event) => {
       },
       Warehouse: true,
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
   // console.log(tickets);
   return { tickets };
