@@ -45,7 +45,11 @@
 
 <div class="{className} grid gap-4 mt-4 mb-8">
   <label>
-    <div class="label">Sender's Name</div>
+    <div class="label">
+      Sender's Name <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       readonly={true}
       bind:value={senderInfo.userName}
@@ -56,7 +60,11 @@
   </label>
 
   <label>
-    <div class="label">Sender's Phone Number</div>
+    <div class="label">
+      Sender's Phone Number <span
+        class="text-lg font-semibold text-complementary">*</span
+      >
+    </div>
     <input
       readonly={true}
       bind:value={senderInfo.phoneNumber}
@@ -67,7 +75,11 @@
   </label>
 
   <label>
-    <div class="label">Pick up time</div>
+    <div class="label">
+      Pick up time <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={senderInfo.pickUpTime}
@@ -82,7 +94,11 @@
     />
   </label>
   <label>
-    <div class="label">Pick up location</div>
+    <div class="label">
+      Pick up location <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={senderInfo.pickUpLocation}
@@ -108,7 +124,11 @@
       </div>
     {/if}
     <label>
-      <div class="label">Map Address</div>
+      <div class="label">
+        Map Address <span class="text-lg font-semibold text-complementary"
+          >*</span
+        >
+      </div>
       <input
         disabled={disableInput}
         value={`${lng},${lat}`}

@@ -23,11 +23,9 @@
       action="?/searchOrder"
       use:enhance={({ formElement }) => {
         const query = formElement.orderId.value;
-        console.log({ qu: formElement.orderId.value });
 
         return async ({ update }) => {
           await update();
-          console.log({ qu: formElement.orderId.value });
           formElement.orderId.value = query;
         };
       }}
@@ -98,9 +96,14 @@
         <div
           class=" {order.receiverCustomerId === data.session?.customerData.id
             ? 'bg-secondary/30'
-            : 'bg-white'} px-4 py-4 flex items-center shadow-md gap-2 my-4 rounded-md"
+            : 'bg-white'} px-4 py-4 shadow-md gap-2 my-4 rounded-md"
         >
           <!-- <Image class="mr-2" /> -->
+          <p class="text-sm font-light">
+            {order.receiverCustomerId === data.session?.customerData.id
+              ? "Package Coming to you"
+              : ""}
+          </p>
           <div>
             <div class="flex gap-4 mb-2">
               <p class="text-orderCardText font-bold text-base">

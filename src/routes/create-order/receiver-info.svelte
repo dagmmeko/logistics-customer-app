@@ -13,8 +13,8 @@
   let dateInput: any;
 
   let className = "";
-  let lat: number;
-  let lng: number;
+  let lat2: number = 9;
+  let lng2: number = 9;
 
   export { className as class };
   const dispatch = createEventDispatcher();
@@ -117,7 +117,11 @@
     {/each}
   {/if}
   <label>
-    <div class="label">Receiver's Name</div>
+    <div class="label">
+      Receiver's Name <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.userName}
@@ -127,7 +131,11 @@
     />
   </label>
   <label>
-    <div class="label">Receiver's Phone Number</div>
+    <div class="label">
+      Receiver's Phone Number <span
+        class="text-lg font-semibold text-complementary">*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.phoneNumber}
@@ -137,7 +145,11 @@
     />
   </label>
   <label>
-    <div class="label">Receiver's Email</div>
+    <div class="label">
+      Receiver's Email <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.receiverEmail}
@@ -146,33 +158,44 @@
       name="receiverEmail"
     />
   </label>
-  <div class="flex justify-between">
-    <label>
-      <input
-        disabled={disableInput}
-        value={0}
-        type="radio"
-        bind:group={radio}
-        class="mr-2"
-        name="inCity"
-      />Deliver In city
-    </label>
-    <label>
-      <input
-        disabled={disableInput}
-        value={1}
-        type="radio"
-        bind:group={radio}
-        class="mr-2"
-        name="inCity"
-      />Deliver Outside city
-    </label>
+  <div>
+    <div class="label mb-2">
+      Delivery Type <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
+    <div class="flex items-center justify-between">
+      <label class="flex items-center">
+        <input
+          disabled={disableInput}
+          value={0}
+          type="radio"
+          bind:group={radio}
+          class="mr-2 h-4 w-4"
+          name="inCity"
+        />Deliver In city
+      </label>
+      <label class="flex items-center">
+        <input
+          disabled={disableInput}
+          value={1}
+          type="radio"
+          bind:group={radio}
+          class="mr-2 h-4 w-4"
+          name="inCity"
+        />Deliver Outside city
+      </label>
+    </div>
   </div>
 
   <div class="w-full h-[1px] bg-gray7" />
 
   <label>
-    <div class="label">Drop off date</div>
+    <div class="label">
+      Drop off date <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.dropOffTime}
@@ -188,7 +211,11 @@
   </label>
 
   <label>
-    <div class="label">Drop off Location</div>
+    <div class="label">
+      Drop off Location <span class="text-lg font-semibold text-complementary"
+        >*</span
+      >
+    </div>
     <input
       disabled={disableInput}
       bind:value={receiversInfo.dropOffLocation}
@@ -201,17 +228,20 @@
   <div class="h-56 flex-1">
     {#if showMap}
       <div class="h-56 flex-1">
-        {#if lat && lng}
-          <Map center={[lng, lat]} zoom={10} />
+        {#if lat2 && lng2}
+          <Map center={[lng2, lat2]} zoom={10} />
         {/if}
       </div>
     {/if}
   </div>
   <label>
-    <div class="label">Map Address</div>
+    <div class="label">
+      Map Address <span class="text-lg font-semibold text-complementary">*</span
+      >
+    </div>
     <input
       disabled={disableInput}
-      value={`${lng},${lat}`}
+      value={`${lng2},${lat2}`}
       class="input max-w-md"
       type="text"
       name="dropOffMapAddress"

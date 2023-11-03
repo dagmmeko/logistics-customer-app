@@ -1,7 +1,10 @@
 <script lang="ts">
+  import FileUpload from "$lib/assets/shared/file-upload.svg.svelte";
+  import Upload from "$lib/assets/shared/upload.svg.svelte";
   import { superForm } from "sveltekit-superforms/client";
 
   export let data;
+  let frontFileData: string[] = [];
 
   const { form, enhance, errors, constraints } = superForm(data.addTicketForm);
 </script>
@@ -31,6 +34,43 @@
         bind:value={$form.description}
         {...$constraints.description}
       />
+    </label>
+    <label>
+      <input
+        class="hidden"
+        type="file"
+        name="ticketFiles"
+        accept="image/*"
+        multiple
+        on:change={(e) => {
+          const data = e.currentTarget.files;
+          if (data) {
+            for (let i = 0; i <= data?.length; i++) {
+              if (data.item(i)) {
+                frontFileData = [...frontFileData, data[i].name];
+              }
+            }
+          }
+        }}
+      />
+      <hr class="my-6" />
+
+      <div
+        class="flex bg-primary rounded-lg min-w-fit max-w-0 gap-2 items-center justify-center px-6 shadow-md py-2"
+      >
+        <Upload color="white" />
+        <p class="text-white">Upload Ticket files</p>
+      </div>
+      {#if frontFileData.length}
+        <div class="flex flex-wrap gap-6 mt-4">
+          {#each frontFileData as file}
+            <div class="flex shadow-md bg-white rounded-lg w-56 items-center">
+              <FileUpload class="h-6 w-6 flex-shrink-0 ml-2" color="#777777" />
+              <p class="text-sm ml-2 flex-1 line-clamp-1 py-2">{file}</p>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </label>
     <button
       class="bg-secondary flex justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"

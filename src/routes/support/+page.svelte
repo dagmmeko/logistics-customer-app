@@ -6,7 +6,7 @@
 </script>
 
 <div class="mx-6 my-4">
-  <a href="/support/add-issue">
+  <a href="/support/create-issue">
     <div
       class="bg-secondary flex gap-3 px-12 justify-center items-center rounded-xl h-12 max-w-sm text-white"
     >

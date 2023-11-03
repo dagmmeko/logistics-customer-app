@@ -19,5 +19,6 @@ export const load = async (event) => {
       Warehouse: true,
     },
   });
+  // console.log(tickets);
   return { tickets };
 };

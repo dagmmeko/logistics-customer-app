@@ -7,7 +7,6 @@
   import { clickOutside } from "$lib/utils/click-outside";
 
   let modalVisible: boolean = false;
-  $: console.log(modalVisible);
 </script>
 
 <header
@@ -16,7 +15,6 @@
 >
   <button
     on:click={() => {
-      console.log("enatih tebeda");
       modalVisible = !modalVisible;
     }}
   >
