@@ -4,8 +4,6 @@
   import Barcode from "svelte-barcode";
 
   export let data;
-
-  let radio: number;
 </script>
 
 <div class=" mt-8 mb-16 grid justify-center">
@@ -44,8 +42,7 @@
               <input
                 disabled
                 value={milestone.isCompleted}
-                type="radio"
-                bind:group={radio}
+                type="checkbox"
                 class="mr-2"
                 name="milestones"
               />{milestone.description}
