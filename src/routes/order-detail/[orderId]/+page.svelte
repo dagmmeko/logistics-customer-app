@@ -32,7 +32,7 @@
   </div>
 
   {#if data.orderDetail?.orderStatus !== "COMPLETED"}
-    <div class="bg-tableHeaderBg max-w-sm w-80 p-4 my-4 rounded-md shadow-md">
+    <div class="bg-tableHeaderBg max-w-sm w-96 p-4 my-4 rounded-md shadow-md">
       <p>Milestones</p>
       {#if data.orderDetail}
         {#each data.orderDetail.orderMilestone as milestone}
