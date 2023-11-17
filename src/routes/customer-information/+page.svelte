@@ -1,16 +1,11 @@
 <script lang="ts">
-  import { page } from "$app/stores";
-  import { Map, controls, Marker } from "@beyonk/svelte-mapbox";
-  import Image from "$lib/assets/shared/image.svg.svelte";
-  import { superForm } from "sveltekit-superforms/client";
-  import { CustomerType } from "@prisma/client";
-  import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
-  import { goto } from "$app/navigation";
-  import Employee from "$lib/assets/shared/employee.svg.svelte";
-  import { enhance } from "$app/forms";
-  import { signOut } from "@auth/sveltekit/client";
-  import GoogleMaps from "$lib/components/google-maps.svelte";
   import { browser } from "$app/environment";
+  import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
+  import Image from "$lib/assets/shared/image.svg.svelte";
+  import GoogleMaps from "$lib/components/google-maps.svelte";
+  import { signOut } from "@auth/sveltekit/client";
+  import { superForm } from "sveltekit-superforms/client";
 
   export let data;
   export let form;
@@ -191,8 +186,8 @@
         on:change={() => (edit = false)}
       >
         <option selected disabled>Not selected</option>
-        <option value={CustomerType.COMMERCIAL}> Commercial </option>
-        <option value={CustomerType.RESIDENTIAL}> Residential </option>
+        <option value={"COMMERCIAL"}> Commercial </option>
+        <option value={"RESIDENTIAL"}> Residential </option>
       </select>
     </label>
 
