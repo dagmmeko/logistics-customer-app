@@ -30,7 +30,7 @@
   $: console.log({ center: $customerInformationForm });
 
   // Split the mapLocation string into its lat and lng components
-  let [mapLat, mapLng] = $customerInformationForm.mapAddress?.split(",") || [];
+  let [mapLng, mapLat] = $customerInformationForm.mapAddress?.split(",") || [];
   // If both lat and lng are present, update the center variable
   if (mapLat && mapLng) {
     console.log({ mapLat, mapLng });
@@ -211,8 +211,7 @@
         class="input max-w-sm"
         type="text"
         name="mapAddress"
-        bind:value={$customerInformationForm.mapAddress}
-        {...$constraints.mapAddress}
+        value={`${center[0]},${center[1]}`}
       />
     </label>
     <button

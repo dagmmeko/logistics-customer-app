@@ -10,11 +10,12 @@
   import Map from "$lib/components/map.svelte";
   import { browser } from "$app/environment";
   import { custom } from "zod";
+  import GoogleMaps from "$lib/components/google-maps.svelte";
   let dateInput: any;
 
   let className = "";
-  let lat2: number = 9;
-  let lng2: number = 9;
+  let lat2: number = 9.01;
+  let lng2: number = 38.74;
 
   export { className as class };
   const dispatch = createEventDispatcher();
@@ -22,7 +23,6 @@
   let center = [0, 0];
   let zoom = 7;
   let radio: number;
-  export let showMap: boolean;
   export let form: ActionData | undefined = undefined;
 
   export let receiversInfo: {
@@ -225,14 +225,12 @@
     />
   </label>
 
-  <div class="h-56 flex-1">
-    {#if showMap}
-      <div class="h-56 flex-1">
-        {#if lat2 && lng2}
-          <Map center={[lng2, lat2]} zoom={10} />
-        {/if}
-      </div>
-    {/if}
+  <div class="bg-tableHeaderBg p-3 rounded-md">
+    <div class="h-fit flex-1">
+      {#if lat2 && lng2}
+        <GoogleMaps bind:lat={lat2} bind:lng={lng2} />
+      {/if}
+    </div>
   </div>
   <label>
     <div class="label">

@@ -5,7 +5,9 @@
   import Barcode from "svelte-barcode";
 
   export let data;
-  let [mapLat, mapLng] = data.orderDetail?.pickUpMapLocation.split(",") || [];
+  let [mapLng, mapLat] = data.orderDetail?.pickUpMapLocation.split(",") || [];
+  let [destinationLng, destinationLat] =
+    data.orderDetail?.dropOffMapLocation.split(",") || [];
   $: console.log({ mapLat, mapLng });
 </script>
 
@@ -30,13 +32,7 @@
   </div>
 
   {#if data.orderDetail?.orderStatus !== "COMPLETED"}
-    <div class="h-56 w-[352px] flex-1">
-      <div class="h-56 flex-1">
-        <!-- <Map center={[38.77567004353659, 8.99179483547789]} zoom={10} /> -->
-      </div>
-    </div>
-
-    <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+    <div class="bg-tableHeaderBg max-w-sm w-80 p-4 my-4 rounded-md shadow-md">
       <p>Milestones</p>
       {#if data.orderDetail}
         {#each data.orderDetail.orderMilestone as milestone}
@@ -83,28 +79,32 @@
     </span>
 
     <div class="mt-4">
-      <GoogleMaps lng={Number(mapLng)} lat={Number(mapLat)} />
-      <div class="font-medium text-base">Pick Up</div>
-      <div class="h-32 w-full bg-green-100">
-        {data.orderDetail?.pickUpMapLocation}
+      <GoogleMaps
+        display={true}
+        destinationLat={Number(destinationLat)}
+        destinationLng={Number(destinationLng)}
+        lng={Number(mapLng)}
+        lat={Number(mapLat)}
+      />
+      <div class="font-semibold w-full text-lg mt-4">Pick Up</div>
+
+      <div class="mt-2">
+        <span class="font-semibold">Location:</span>{data.orderDetail
+          ?.pickUpPhysicalLocation}
       </div>
       <div class="mt-2">
-        Location :{data.orderDetail?.pickUpPhysicalLocation}
+        <span class="font-semibold">Time:</span>
+        {dayjs(data.orderDetail?.pickUpTime).format("MMM DD/YY ")}
+      </div>
+      <div class="font-semibold text-lg mt-4">Drop Off</div>
+
+      <div class="mt-2">
+        <span class="font-semibold">Location:</span>
+        {data.orderDetail?.dropOffPhysicalLocation}
       </div>
       <div class="mt-2">
-        Time: {dayjs(data.orderDetail?.pickUpTime).format(
-          "hh:mm a, DD,MMM/YY "
-        )}
-      </div>
-      <div class="font-medium text-base mt-4">Drop Off</div>
-      <div class="h-32 w-full bg-green-100">
-        {data.orderDetail?.dropOffMapLocation}
-      </div>
-      <div class="mt-2">
-        Location: {data.orderDetail?.dropOffPhysicalLocation}
-      </div>
-      <div class="mt-2">
-        Time: {dayjs(data.orderDetail?.dropOffTime).format("DD MMM YY")}
+        <span class="font-semibold"> Time:</span>
+        {dayjs(data.orderDetail?.dropOffTime).format("MMM DD/YY")}
       </div>
     </div>
   </div>

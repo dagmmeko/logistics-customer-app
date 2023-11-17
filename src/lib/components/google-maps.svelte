@@ -4,15 +4,17 @@
   import { PUBLIC_GOOGLE_MAPS_API } from "$env/static/public";
   export let lat: number;
   export let lng: number;
-
+  export let destinationLat: number = 0;
+  export let destinationLng: number = 0;
+  export let display: boolean = false;
   $: if (browser) {
     const loader = new Loader({
       apiKey: PUBLIC_GOOGLE_MAPS_API,
       version: "weekly",
     });
 
+    console.log({ destinationLat, destinationLng });
     loader.importLibrary("places").then(async () => {
-      console.log("loaded");
       const { Map } = (await google.maps.importLibrary(
         "maps"
       )) as google.maps.MapsLibrary;
@@ -28,16 +30,33 @@
         map,
       });
 
-      // map.addListener("click", (e: any) => {
-      //   markers.forEach((marker) => {
-      //     marker.setMap(null);
-      //   });
-      //   markers = [];
-      //   // map.setCenter(e.latLng as google.maps.LatLng);
-      //   marker.setPosition(e.latLng);
-      //   lat = e.latLng.lat();
-      //   lng = e.latLng.lng();
-      // });
+      if (display) {
+        const marker2 = new google.maps.Marker({
+          position: { lat: destinationLat, lng: destinationLng },
+          map,
+        });
+
+        // Create a new bounds object
+        const bounds = new google.maps.LatLngBounds();
+
+        // Extend the bounds to include the positions of both markers
+        bounds.extend(marker.getPosition() as google.maps.LatLng);
+        bounds.extend(marker2.getPosition() as google.maps.LatLng);
+
+        // Adjust the map's viewport to fit the bounds
+        map.fitBounds(bounds);
+      } else {
+        map.addListener("click", (e: any) => {
+          markers.forEach((marker) => {
+            marker.setMap(null);
+          });
+          markers = [];
+          // map.setCenter(e.latLng as google.maps.LatLng);
+          marker.setPosition(e.latLng);
+          lat = e.latLng.lat();
+          lng = e.latLng.lng();
+        });
+      }
 
       const input = document.getElementById("pac-input") as HTMLInputElement;
       const searchBox = new google.maps.places.SearchBox(input);
@@ -87,9 +106,11 @@
 </script>
 
 <div id="map" class="w-full h-72" />
-<input
-  id="pac-input"
-  class="w-full control p-3 text-sm mt-4 rounded"
-  type="text"
-  placeholder="Bole, Merkato, ...."
-/>
+{#if display}
+  <input
+    id="pac-input"
+    class="w-full control p-3 text-sm mt-4 rounded"
+    type="text"
+    placeholder="Bole, Merkato, ...."
+  />
+{/if}

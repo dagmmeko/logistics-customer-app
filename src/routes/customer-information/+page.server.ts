@@ -60,10 +60,15 @@ export let actions = {
     const session =
       (await event.locals.getSession()) as EnhancedSessionType | null;
     const customerInformationForm = await superValidate(
-      event.request,
+      event.request.clone(),
       customerInformationSchema
     );
+    const data = await event.request.clone().formData();
+    const mapAddress = data.get("mapAddress");
 
+    if (typeof mapAddress !== "string") {
+      return fail(500, { errorMessage: "Issue with the map address." });
+    }
     const updatedCustomer = await prisma.user.update({
       where: { id: session?.userData.id },
       data: {
@@ -73,7 +78,7 @@ export let actions = {
           update: {
             customerType: customerInformationForm.data.customerType,
             premium: customerInformationForm.data.premium,
-            mapAddress: customerInformationForm.data.mapAddress,
+            mapAddress: mapAddress,
             physicalAddress: customerInformationForm.data.physicalAddress,
           },
         },
