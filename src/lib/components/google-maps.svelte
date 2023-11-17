@@ -1,23 +1,25 @@
 <script lang="ts">
   import { Loader } from "@googlemaps/js-api-loader";
   import { browser } from "$app/environment";
+  import { PUBLIC_GOOGLE_MAPS_API } from "$env/static/public";
   export let lat: number;
   export let lng: number;
 
-  if (browser) {
+  $: if (browser) {
     const loader = new Loader({
-      apiKey: "AIzaSyBS2LM-Ua_hgjfJZIe81_u6bh7XRAhs4m8",
+      apiKey: PUBLIC_GOOGLE_MAPS_API,
       version: "weekly",
     });
 
     loader.importLibrary("places").then(async () => {
+      console.log("loaded");
       const { Map } = (await google.maps.importLibrary(
         "maps"
       )) as google.maps.MapsLibrary;
       const map = new Map(document.getElementById("map") as HTMLElement, {
         center: { lat: lat, lng: lng },
         minZoom: 1,
-        zoom: 14,
+        zoom: 10,
         mapTypeId: "roadmap",
         disableDefaultUI: true,
       });
@@ -26,16 +28,16 @@
         map,
       });
 
-      map.addListener("click", (e: any) => {
-        markers.forEach((marker) => {
-          marker.setMap(null);
-        });
-        markers = [];
-        // map.setCenter(e.latLng as google.maps.LatLng);
-        marker.setPosition(e.latLng);
-        lat = e.latLng.lat();
-        lng = e.latLng.lng();
-      });
+      // map.addListener("click", (e: any) => {
+      //   markers.forEach((marker) => {
+      //     marker.setMap(null);
+      //   });
+      //   markers = [];
+      //   // map.setCenter(e.latLng as google.maps.LatLng);
+      //   marker.setPosition(e.latLng);
+      //   lat = e.latLng.lat();
+      //   lng = e.latLng.lng();
+      // });
 
       const input = document.getElementById("pac-input") as HTMLInputElement;
       const searchBox = new google.maps.places.SearchBox(input);

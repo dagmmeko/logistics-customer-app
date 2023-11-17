@@ -9,11 +9,11 @@
   import Employee from "$lib/assets/shared/employee.svg.svelte";
   import { enhance } from "$app/forms";
   import { signOut } from "@auth/sveltekit/client";
+  import GoogleMaps from "$lib/components/google-maps.svelte";
+  import { browser } from "$app/environment";
 
   export let data;
   export let form;
-
-  const { GeolocateControl } = controls;
 
   const {
     form: customerInformationForm,
@@ -24,21 +24,38 @@
 
   let edit = true;
 
-  let center = [0, 0];
+  let center = [38.797312, 9.0046464];
   let zoom = 7;
+
+  $: console.log({ center: $customerInformationForm });
 
   // Split the mapLocation string into its lat and lng components
   let [mapLat, mapLng] = $customerInformationForm.mapAddress?.split(",") || [];
-
   // If both lat and lng are present, update the center variable
   if (mapLat && mapLng) {
-    center = [Number(mapLng.trim()), Number(mapLat.trim())];
+    console.log({ mapLat, mapLng });
+    center = [Number(mapLng), Number(mapLat)];
+  } else if (browser) {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("User location:", position);
+          center = [position.coords.longitude, position.coords.latitude];
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        }
+      );
+    } else {
+      // Geolocation is not supported by the browser
+      console.error("Geolocation is not supported by this browser.");
+    }
   }
 
   $: form?.updatedCustomer ? goto("/") : null;
 </script>
 
-<div class="p-12 grid justify-items-center">
+<div class="p-6 grid justify-items-center">
   <form
     method="post"
     action="?/uploadProfilePicture"
@@ -83,6 +100,12 @@
       Upgrade to Premium</button
     >
   {/if}
+
+  {#if !data.session?.customerData.customerType}
+    <p class="text-sm font-medium text-complementary">
+      Please provide the customer information
+    </p>
+  {/if}
   <form
     class="grid gap-6 mt-4"
     method="post"
@@ -90,7 +113,13 @@
     use:customerInformationEnhance
   >
     <label>
-      <div class="label">User Name</div>
+      <div
+        class="label {!data.session?.userData.userName
+          ? 'text-complementary'
+          : ''}"
+      >
+        User Name
+      </div>
       <input
         class="input w-72 max-w-sm"
         type="text"
@@ -100,7 +129,13 @@
       />
     </label>
     <label>
-      <div class="label">Email</div>
+      <div
+        class="label {!data.session?.userData.email
+          ? 'text-complementary'
+          : ''}"
+      >
+        Email
+      </div>
       <input
         class="input max-w-sm"
         type="text"
@@ -110,7 +145,13 @@
       />
     </label>
     <label>
-      <div class="label">Phone Number</div>
+      <div
+        class="label {!data.session?.userData.phoneNumber
+          ? 'text-complementary'
+          : ''}"
+      >
+        Phone Number
+      </div>
       <input
         class="input max-w-sm"
         type="text"
@@ -120,7 +161,13 @@
       />
     </label>
     <label>
-      <div class="label">Physical Address</div>
+      <div
+        class="label {!data.session?.customerData.physicalAddress
+          ? 'text-complementary'
+          : ''}"
+      >
+        Physical Address
+      </div>
       <input
         class="input max-w-sm"
         type="text"
@@ -130,7 +177,13 @@
       />
     </label>
     <label>
-      <div class="label">Customer Type</div>
+      <div
+        class="label {!data.session?.customerData.customerType
+          ? 'text-complementary'
+          : ''}"
+      >
+        Customer Type
+      </div>
       <select
         bind:value={$customerInformationForm.customerType}
         class="input max-w-sm"
@@ -143,25 +196,17 @@
       </select>
     </label>
 
-    <div class="h-56 flex-1">
-      <Map
-        accessToken={PUBLIC_MAPBOX_TOKEN}
-        bind:center
-        bind:zoom
-        on:recentre={async (e) => {
-          center = [
-            // @ts-ignore
-            e.detail.center.lat,
-            // @ts-ignore
-            e.detail.center.lng,
-          ];
-        }}
-      >
-        <GeolocateControl />
-      </Map>
+    <div class="h-fit bg-primary/10 p-2 flex-1">
+      <GoogleMaps bind:lng={center[0]} bind:lat={center[1]} />
     </div>
     <label>
-      <div class="label">Map Address</div>
+      <div
+        class="label {!data.session?.customerData.mapAddress
+          ? 'text-complementary'
+          : ''}"
+      >
+        Map Address
+      </div>
       <input
         class="input max-w-sm"
         type="text"
@@ -179,7 +224,7 @@
   <hr />
   <button
     on:click={() => signOut()}
-    class="bg-complementary w-full mt-6 flex justify-center items-center rounded-xl h-12 max-w-sm text-white"
+    class="bg-complementary w-72 mt-6 flex justify-center items-center rounded-xl h-12 max-w-sm text-white"
   >
     Logout
   </button>

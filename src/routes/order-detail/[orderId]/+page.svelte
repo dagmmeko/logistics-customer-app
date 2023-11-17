@@ -1,13 +1,16 @@
 <script lang="ts">
+  import GoogleMaps from "$lib/components/google-maps.svelte";
   import Map from "$lib/components/map.svelte";
   import dayjs from "dayjs";
   import Barcode from "svelte-barcode";
 
   export let data;
+  let [mapLat, mapLng] = data.orderDetail?.pickUpMapLocation.split(",") || [];
+  $: console.log({ mapLat, mapLng });
 </script>
 
 <div class=" mt-8 mb-16 grid justify-center">
-  <div>
+  <div class="flex justify-center">
     <Barcode
       value={data.orderDetail?.id}
       elementTag={"canvas"}
@@ -29,7 +32,7 @@
   {#if data.orderDetail?.orderStatus !== "COMPLETED"}
     <div class="h-56 w-[352px] flex-1">
       <div class="h-56 flex-1">
-        <Map center={[38, 9]} zoom={10} />
+        <!-- <Map center={[38.77567004353659, 8.99179483547789]} zoom={10} /> -->
       </div>
     </div>
 
@@ -78,7 +81,9 @@
       class="text-sm font-medium text-white mt-1 ml-6 border-secondary border-[1px] bg-secondary/60 px-2 py-1 rounded-md"
       >{data.orderDetail?.orderStatus}
     </span>
+
     <div class="mt-4">
+      <GoogleMaps lng={Number(mapLng)} lat={Number(mapLat)} />
       <div class="font-medium text-base">Pick Up</div>
       <div class="h-32 w-full bg-green-100">
         {data.orderDetail?.pickUpMapLocation}
