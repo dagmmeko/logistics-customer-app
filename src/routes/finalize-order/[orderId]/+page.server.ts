@@ -1,3 +1,4 @@
+import { WEBAPP_URL } from "$env/static/private";
 import { prisma } from "$lib/utils/prisma.js";
 import { fail, redirect } from "@sveltejs/kit";
 import { randomBytes } from "crypto";
@@ -142,8 +143,8 @@ export let actions = {
             last_name: addPaymentForm.data.lastName,
             phone_number: validPhoneNumber,
             tx_ref: tx_ref,
-            callback_url: "http://localhost:5173/",
-            return_url: "http://localhost:5173/",
+            callback_url: WEBAPP_URL,
+            return_url: WEBAPP_URL,
             "customization[title]":
               orderDetail?.Sender.User.userName +
               "Paying for Order: " +
