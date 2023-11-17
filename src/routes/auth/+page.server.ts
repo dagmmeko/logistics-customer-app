@@ -34,11 +34,19 @@ export const actions = {
     try {
       const uuidPassword = randomBytes(48).toString("hex");
       const encryptedPassword = await bcrypt.hash(uuidPassword, 10);
-      const user = await prisma.user.update({
+      const user = await prisma.user.upsert({
         where: {
           email: sendEmailForm.data.email,
         },
-        data: {
+        create: {
+          email: sendEmailForm.data.email,
+          jwtPassword: encryptedPassword,
+          isEmployee: false,
+          Customer: {
+            create: {},
+          },
+        },
+        update: {
           jwtPassword: encryptedPassword,
         },
       });
