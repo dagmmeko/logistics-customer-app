@@ -1,4 +1,5 @@
 import { prisma } from "$lib/utils/prisma.js";
+import { sendMail } from "$lib/utils/send-email.server.js";
 import type { PackageType } from "@prisma/client";
 import { fail } from "@sveltejs/kit";
 import * as turf from "@turf/turf";
@@ -22,9 +23,12 @@ export const actions = {
     const packageType = data.get("packageType");
     const receiverId = data.get("receiverId");
 
+    console.log({ mapAddress });
+
     if (
       typeof pickUpTime !== "string" ||
       typeof pickUpLocation !== "string" ||
+      !mapAddress ||
       typeof mapAddress !== "string" ||
       typeof dropOffTime !== "string" ||
       typeof dropOffLocation !== "string" ||
@@ -35,8 +39,10 @@ export const actions = {
       typeof dropOffMapAddress !== "string" ||
       typeof receiverEmail !== "string"
     ) {
-      return;
+      return fail(400, { errorMessage: "Invalid data" });
     }
+
+    console.log("create order");
 
     let inbound = false;
 
@@ -103,7 +109,7 @@ export const actions = {
           dropOffTime: new Date(dropOffTime),
           pickUpTime: new Date(pickUpTime),
           receiverCustomerId: receiverId ? Number(receiverId) : null,
-          receiverEmail: receiverId ? null : receiverUsername,
+          receiverEmail: receiverId ? null : receiverEmail,
           receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
           receiverName: receiverId ? null : receiverUsername,
           isInCity: inbound,
@@ -121,7 +127,36 @@ export const actions = {
         },
       });
 
+      // const emailSentToSender = await sendMail(
+      //   session?.userData.email ?? "",
+      //   "Your order has been created",
+      //   `Your order with id ${newOrder.id}is going to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
+      // );
+      if (!newOrder.receiverCustomerId) {
+        console.log(newOrder.receiverEmail);
+        const emailSentToReceiver = await sendMail(
+          newOrder.receiverEmail ?? "",
+          "Order coming to you has been created.",
+          `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
+        );
+      } else {
+        const user = await prisma.customer.findFirst({
+          where: {
+            id: newOrder.receiverCustomerId,
+          },
+          include: {
+            User: true,
+          },
+        });
+        console.log("HELLO: " + user?.User.email);
+        const emailSentToReceiver = await sendMail(
+          user?.User.email ?? "",
+          "Order coming to you has been created.",
+          `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
+        );
+      }
       console.log({ newOrder });
+
       return { newOrder };
     } catch (error) {
       console.log(error as Error);

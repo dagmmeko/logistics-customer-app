@@ -1,0 +1,93 @@
+<script lang="ts">
+  import { Loader } from "@googlemaps/js-api-loader";
+  import { browser } from "$app/environment";
+  export let lat: number;
+  export let lng: number;
+
+  if (browser) {
+    const loader = new Loader({
+      apiKey: "AIzaSyBS2LM-Ua_hgjfJZIe81_u6bh7XRAhs4m8",
+      version: "weekly",
+    });
+
+    loader.importLibrary("places").then(async () => {
+      const { Map } = (await google.maps.importLibrary(
+        "maps"
+      )) as google.maps.MapsLibrary;
+      const map = new Map(document.getElementById("map") as HTMLElement, {
+        center: { lat: lat, lng: lng },
+        minZoom: 1,
+        zoom: 14,
+        mapTypeId: "roadmap",
+        disableDefaultUI: true,
+      });
+      const marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map,
+      });
+
+      map.addListener("click", (e: any) => {
+        markers.forEach((marker) => {
+          marker.setMap(null);
+        });
+        markers = [];
+        // map.setCenter(e.latLng as google.maps.LatLng);
+        marker.setPosition(e.latLng);
+        lat = e.latLng.lat();
+        lng = e.latLng.lng();
+      });
+
+      const input = document.getElementById("pac-input") as HTMLInputElement;
+      const searchBox = new google.maps.places.SearchBox(input);
+
+      //   map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(input);
+
+      // Bias the SearchBox results towards current map's viewport.
+      map.addListener("bounds_changed", () => {
+        searchBox.setBounds(map.getBounds() as google.maps.LatLngBounds);
+      });
+
+      let markers: google.maps.Marker[] = [];
+
+      searchBox.addListener("places_changed", () => {
+        const places = searchBox.getPlaces();
+
+        if (places?.length == 0) {
+          return;
+        }
+
+        // Clear out the old markers.
+        markers.forEach((marker) => {
+          marker.setMap(null);
+        });
+        markers = [];
+
+        // For each place, get the icon, name and location.
+        const bounds = new google.maps.LatLngBounds();
+
+        places?.forEach((place) => {
+          if (!place.geometry || !place.geometry.location) {
+            console.log("Returned place contains no geometry");
+            return;
+          }
+
+          if (place.geometry.viewport) {
+            // Only geocodes have viewport.
+            bounds.union(place.geometry.viewport);
+          } else {
+            bounds.extend(place.geometry.location);
+          }
+        });
+        map.fitBounds(bounds);
+      });
+    });
+  }
+</script>
+
+<div id="map" class="w-full h-72" />
+<input
+  id="pac-input"
+  class="w-full control p-3 text-sm mt-4 rounded"
+  type="text"
+  placeholder="Bole, Merkato, ...."
+/>

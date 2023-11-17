@@ -2,6 +2,10 @@ import { prisma } from "$lib/utils/prisma.js";
 import { redirect } from "@sveltejs/kit";
 
 export const load = async (event) => {
+  const search = event.url.searchParams.get("searchOrder");
+
+  console.log({ search });
+
   const session =
     (await event.locals.getSession()) as EnhancedSessionType | null;
 
@@ -19,6 +23,7 @@ export const load = async (event) => {
           receiverCustomerId: session.customerData.id,
         },
       ],
+      ...(search ? { id: Number(search) } : {}),
     },
     include: {
       Sender: {
@@ -37,6 +42,8 @@ export const load = async (event) => {
     },
   });
 
+  console.log({ myOrders });
+
   return { myOrders };
 };
 
@@ -47,6 +54,14 @@ export let actions = {
 
     const orderFound = await prisma.order.findFirst({
       where: { id: Number(query), deletedAt: null },
+      include: {
+        Receiver: {
+          include: { User: true },
+        },
+        Sender: {
+          include: { User: true },
+        },
+      },
     });
 
     return { orderFound };

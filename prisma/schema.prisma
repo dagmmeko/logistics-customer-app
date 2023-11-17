@@ -160,13 +160,13 @@ model Order {
   pickUpMapLocation       String
   packageType             PackageType
   paymentStatus           Boolean
-  paymentRef              String?
   orderStatus             Order_orderStatus
   dispatchId              Int?
   createdAt               DateTime          @default(now())
   updateAt                DateTime          @updatedAt
   deletedAt               DateTime?
   isInCity                Boolean           @default(false)
+  paymentRef              String?
   orderMilestone          OrderMilestone[]
   Sender                  Customer          @relation("order sender", fields: [senderCustomerId], references: [id])
   Receiver                Customer?         @relation("order receiver", fields: [receiverCustomerId], references: [id])

@@ -1,3 +1,5 @@
+/// <reference types="google.maps" />
+
 import type { Session } from "@auth/core/types";
 import { User } from "@prisma/client";
 import { Customer } from "@prisma/client";

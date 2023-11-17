@@ -1,12 +1,23 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import FileUpload from "$lib/assets/shared/file-upload.svg.svelte";
   import Upload from "$lib/assets/shared/upload.svg.svelte";
+  import { toast } from "@zerodevx/svelte-toast";
   import { superForm } from "sveltekit-superforms/client";
 
   export let data;
+  export let form;
   let frontFileData: string[] = [];
 
-  const { form, enhance, errors, constraints } = superForm(data.addTicketForm);
+  const {
+    form: addTicketForm,
+    enhance,
+    errors,
+    constraints,
+  } = superForm(data.addTicketForm);
+
+  $: form?.addTicketForm ? toast.push("Issue Reported") : null;
+  $: form?.addTicketForm ? goto("/support") : null;
 </script>
 
 <div class="mx-6 my-10">
@@ -20,7 +31,7 @@
         class="input max-w-sm"
         type="text"
         name="title"
-        bind:value={$form.title}
+        bind:value={$addTicketForm.title}
         {...$constraints.title}
       />
     </label>
@@ -31,7 +42,7 @@
       <textarea
         class="textarea max-w-sm h-36"
         name="description"
-        bind:value={$form.description}
+        bind:value={$addTicketForm.description}
         {...$constraints.description}
       />
     </label>

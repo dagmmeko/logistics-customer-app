@@ -8,6 +8,7 @@
   import { goto } from "$app/navigation";
   import Employee from "$lib/assets/shared/employee.svg.svelte";
   import { enhance } from "$app/forms";
+  import { signOut } from "@auth/sveltekit/client";
 
   export let data;
   export let form;
@@ -66,7 +67,7 @@
         <img
           alt="dp"
           src={data.imgUrl}
-          class="shadow-xl rounded-full mb-4 h-48 w-48 object-cover"
+          class=" rounded-full mb-4 h-48 w-48 object-cover"
         />
       {:else}
         <Image class="mb-4 h-24 w-24" />
@@ -77,7 +78,7 @@
 
   {#if !data.customerInformationForm.data.premium}
     <button
-      class="px-6 h-10 border-[1px] border-secondary text-xs font-semibold text-secondary rounded-xl justify-self-center"
+      class="px-6 h-10 my-6 border-[1px] border-secondary text-xs font-semibold text-secondary rounded-xl justify-self-center"
     >
       Upgrade to Premium</button
     >
@@ -170,9 +171,16 @@
       />
     </label>
     <button
-      class="bg-secondary flex mt-12 justify-center items-center rounded-xl h-12 max-w-sm text-white"
+      class="bg-secondary flex justify-center items-center rounded-xl h-12 max-w-sm text-white"
     >
       Submit
     </button>
   </form>
+  <hr />
+  <button
+    on:click={() => signOut()}
+    class="bg-complementary w-full mt-6 flex justify-center items-center rounded-xl h-12 max-w-sm text-white"
+  >
+    Logout
+  </button>
 </div>

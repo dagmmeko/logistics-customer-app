@@ -6,6 +6,7 @@
   import Map from "$lib/components/map.svelte";
   import { browser } from "$app/environment";
   import { clickOutside } from "$lib/utils/click-outside";
+  import GoogleMaps from "$lib/components/google-maps.svelte";
   let lat: number;
   let lng: number;
 
@@ -27,6 +28,8 @@
     }
   }
 
+  // $: console.log({ lat, lng });
+
   const dispatch = createEventDispatcher();
   let className = "";
   export { className as class };
@@ -40,7 +43,6 @@
   };
 
   export let disableInput = false;
-  export let showMap: boolean;
 </script>
 
 <div class="{className} grid gap-4 mt-4 mb-8">
@@ -84,12 +86,12 @@
       disabled={disableInput}
       bind:value={senderInfo.pickUpTime}
       class="input max-w-md"
-      type="datetime-local"
+      type="date"
       bind:this={dateInput}
       on:click={() => {
         dateInput && dateInput.showPicker();
       }}
-      min={new Date().toISOString().slice(0, 16)}
+      min={new Date().toISOString().split("T")[0]}
       name="pickUpTime"
     />
   </label>
@@ -109,34 +111,17 @@
   </label>
 
   <div class="bg-tableHeaderBg p-3 rounded-md">
-    {#if showMap}
-      <div class="h-56 flex-1">
-        {#if lat && lng}
-          <Map
-            center={[lng, lat]}
-            zoom={10}
-            on:location={(e) => {
-              lat = e.detail.lat;
-              lng = e.detail.lng;
-            }}
-          />
-        {/if}
-      </div>
-    {/if}
-    <label>
-      <div class="label">
-        Map Address <span class="text-lg font-semibold text-complementary"
-          >*</span
-        >
-      </div>
-      <input
-        disabled={disableInput}
-        value={`${lng},${lat}`}
-        class="input max-w-md"
-        type="text"
-        name="mapAddress"
-      />
-    </label>
+    <div class="h-fit flex-1">
+      {#if lat && lng}
+        <GoogleMaps bind:lat bind:lng />
+        <input
+          value={`${lng},${lat}`}
+          class="input max-w-md"
+          type="text"
+          name="mapAddress"
+        />
+      {/if}
+    </div>
   </div>
 
   <div class="flex gap-10 mt-4 max-w-md">

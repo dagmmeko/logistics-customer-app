@@ -95,12 +95,18 @@
     method="post"
     action="?/createOrder"
     use:enhance={({ formData, formElement, cancel }) => {
+      console.log({
+        formElementMapAddress: formElement.mapAddress?.value,
+        d: formElement.receiverUsername.value,
+        s: formElement.receiverPhoneNumber.value,
+        e: formElement.inCity.value,
+      });
       if (
         formElement.userName.value === "" ||
         formElement.phoneNumber.value === "" ||
         formElement.pickUpTime.value === "" ||
         formElement.pickUpLocation.value === "" ||
-        formElement.mapAddress.value === "" ||
+        formElement.mapAddress?.value === "" ||
         formElement.receiverUsername.value === "" ||
         formElement.receiverPhoneNumber.value === "" ||
         formElement.inCity.value === "" ||
@@ -121,7 +127,6 @@
     }}
   >
     <SenderInfo
-      showMap={componentsOrder === 1}
       class={componentsOrder === 1 ? "" : "hidden"}
       bind:senderInfo
       on:back={() => {
