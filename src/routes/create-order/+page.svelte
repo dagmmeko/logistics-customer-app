@@ -14,7 +14,7 @@
   let senderInfo: {
     userName: string;
     phoneNumber: string;
-    pickUpTime: Date | null;
+    pickUpTime: string | null;
     pickUpLocation: string;
     mapLocation: string;
   } = {
@@ -28,7 +28,7 @@
     id: Number;
     userName: string;
     phoneNumber: string;
-    dropOffTime: Date | null;
+    dropOffTime: string;
     dropOffLocation: string;
     dropOffMapLocation: string;
     inCity: string;

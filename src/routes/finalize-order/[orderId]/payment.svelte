@@ -1,10 +1,7 @@
 <script lang="ts">
   import { toast } from "@zerodevx/svelte-toast";
-  import type { ActionData } from "./$types";
-  import { page } from "$app/stores";
   import { superForm } from "sveltekit-superforms/client";
-  import type { PageData } from "./$types";
-  import { goto } from "$app/navigation";
+  import type { ActionData, PageData } from "./$types";
 
   export let form: ActionData;
   export let data: PageData;

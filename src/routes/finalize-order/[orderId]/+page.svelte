@@ -15,13 +15,14 @@
   let senderInfo: {
     userName: string;
     phoneNumber: string;
-    pickUpTime: Date | null;
+    pickUpTime: string;
     pickUpLocation: string;
     mapLocation: string;
   } = {
     userName: data.orderDetail?.Sender.User.userName ?? "",
     phoneNumber: data.orderDetail?.Sender.User.phoneNumber ?? "",
-    pickUpTime: dayjs(data.orderDetail?.pickUpTime).toDate() ?? "",
+    pickUpTime:
+      dayjs(data.orderDetail?.pickUpTime).toISOString().substr(0, 10) ?? "",
     pickUpLocation: data.orderDetail?.pickUpPhysicalLocation ?? "",
     mapLocation: data.orderDetail?.pickUpMapLocation ?? "",
   };
@@ -30,27 +31,33 @@
     id: Number;
     userName: string | null;
     phoneNumber: string | null;
-    dropOffTime: Date | null;
+    dropOffTime: string | null;
     dropOffLocation: string | null;
     dropOffMapLocation: string | null;
     inCity: string | null;
     receiverEmail: string | null;
   } = {
     id: data.orderDetail?.Receiver?.id ?? 0,
-    userName: !data.orderDetail?.receiverName
-      ? data.orderDetail?.Receiver?.User.userName ?? ""
-      : "",
-    phoneNumber: !data.orderDetail?.receiverPhoneNumber
-      ? data.orderDetail?.Receiver?.User.phoneNumber ?? ""
-      : "",
-    dropOffTime: dayjs(data.orderDetail?.dropOffTime).toDate() ?? "",
+    userName:
+      data.orderDetail?.Receiver?.User.userName ??
+      data.orderDetail?.receiverName ??
+      "",
+    phoneNumber:
+      data.orderDetail?.Receiver?.User.phoneNumber ??
+      data.orderDetail?.receiverPhoneNumber ??
+      "",
+    dropOffTime:
+      dayjs(data.orderDetail?.dropOffTime).toISOString().substr(0, 10) ?? "",
     dropOffLocation: data.orderDetail?.dropOffPhysicalLocation ?? "",
     dropOffMapLocation: data.orderDetail?.dropOffMapLocation ?? "",
     inCity: "1",
-    receiverEmail: !data.orderDetail?.receiverEmail
-      ? data.orderDetail?.Receiver?.User.email ?? ""
-      : "",
+    receiverEmail:
+      data.orderDetail?.Receiver?.User.email ??
+      data.orderDetail?.receiverEmail ??
+      "",
   };
+
+  $: console.log({ data: data.orderDetail });
   let packageTemp: PackageType | null = data.orderDetail?.packageType ?? null;
 </script>
 

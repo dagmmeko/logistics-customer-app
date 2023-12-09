@@ -15,17 +15,14 @@
 
   export { className as class };
   const dispatch = createEventDispatcher();
-  const { GeolocateControl } = controls;
-  let center = [0, 0];
-  let zoom = 7;
-  let radio: number;
+
   export let form: ActionData | undefined = undefined;
 
   export let receiversInfo: {
     id: Number;
     userName: string | null;
     phoneNumber: string | null;
-    dropOffTime: Date | null;
+    dropOffTime: string | null;
     dropOffLocation: string | null;
     dropOffMapLocation: string | null;
     inCity: string | null;
@@ -40,6 +37,12 @@
     inCity: null,
     receiverEmail: null,
   };
+  let radio: number | null =
+    receiversInfo.inCity !== null
+      ? receiversInfo.inCity === "0"
+        ? 0
+        : 1
+      : null;
 
   let searchResultVisible: boolean = false;
   export let disableInput = false;

@@ -37,7 +37,7 @@
   export let senderInfo: {
     userName: string;
     phoneNumber: string;
-    pickUpTime: Date | null;
+    pickUpTime: string | null;
     pickUpLocation: string;
     mapLocation: string;
   };

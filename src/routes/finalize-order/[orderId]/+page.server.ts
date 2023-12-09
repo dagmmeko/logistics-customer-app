@@ -29,6 +29,7 @@ export const load = async (event) => {
     throw new Error("Order Id not found!");
   }
 
+  console.log("load");
   const orderDetail = await prisma.order.findFirst({
     where: {
       id: Number(event.params.orderId),

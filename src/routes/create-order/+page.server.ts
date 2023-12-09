@@ -151,7 +151,7 @@ export const actions = {
                 ...orderMilestones?.map((milestone) => {
                   return {
                     description: milestone.description,
-                    coordinate: milestone.coordinate,
+                    coordinates: milestone.coordinate,
                   };
                 }),
               ],
