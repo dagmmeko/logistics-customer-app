@@ -57,23 +57,27 @@ export const actions = {
     });
 
     let isInside;
-    let orderMilestones: string[] = [];
+    let orderMilestones: { description: string; coordinate?: string }[] = [];
     if (inCity === "0") {
       inbound = true;
       orderMilestones = [
-        "Pick up from Sender",
-        "Take to drop off",
-        "Deliver Item",
+        { description: "Pick up from Sender", coordinate: mapAddress },
+        { description: "Take to drop off", coordinate: dropOffMapAddress },
+        { description: "Deliver Item" },
       ];
     } else {
       const orderLocation = mapAddress.split(",");
       const receiverLocation = dropOffMapAddress.split(",");
-      const targetPoint = turf.point([
+      const receiverPoint = turf.point([
         Number(receiverLocation[0]),
         Number(receiverLocation[1]),
       ]);
+      const senderPoint = turf.point([
+        Number(orderLocation[0]),
+        Number(orderLocation[1]),
+      ]);
 
-      const points = turf.featureCollection([
+      const warehousePoints = turf.featureCollection([
         ...warehouses.map((warehouse) => {
           const warehouseLocation = warehouse.mapLocation.split(",");
 
@@ -84,106 +88,108 @@ export const actions = {
         }),
       ]);
 
-      var nearest = turf.nearestPoint(targetPoint, points);
+      const nearestToReceiver = turf.nearestPoint(
+        receiverPoint,
+        warehousePoints
+      );
+      const nearestToSender = turf.nearestPoint(senderPoint, warehousePoints);
 
-      const nearW = warehouses.find(
+      const nearToReceiverWarehouse = warehouses.find(
         (w) =>
           w.mapLocation ===
-          `${nearest.geometry.coordinates[0]}, ${nearest.geometry.coordinates[1]}`
+          `${nearestToReceiver.geometry.coordinates[0]}, ${nearestToReceiver.geometry.coordinates[1]}`
       );
-      console.log({ nearW });
-      // warehouses.forEach((warehouse) => {
-      //   const point = turf.point([
-      //     Number(orderLocation[0]),
-      //     Number(orderLocation[1]),
-      //   ]);
-      //   console.log({ l: warehouse.mapLocation });
 
-      //   if (Array(warehouse.region.coordinates).length >= 4) {
-      //     const poly = turf.polygon([
-      //       warehouse.region.coordinates as turf.Position[],
-      //     ]);
-      //     isInside = turf.booleanPointInPolygon(point, poly);
+      const nearToSenderWarehouse = warehouses.find(
+        (w) =>
+          w.mapLocation ===
+          `${nearestToSender.geometry.coordinates[0]}, ${nearestToSender.geometry.coordinates[1]}`
+      );
 
-      //     if (isInside) {
-      //       orderMilestones = [
-      //         "Pick up from Sender",
-      //         "Take to " + warehouse.name + " warehouse",
-      //         "Deliver Item",
-      //       ];
-      //     }
-      //   } else {
-      //   }
-      // });
+      console.log({ nearToReceiverWarehouse, nearToSenderWarehouse });
+
+      orderMilestones = [
+        { description: "Pick up from Sender", coordinate: mapAddress },
+        {
+          description: "Take to " + nearToSenderWarehouse?.name + " warehouse",
+          coordinate: nearToSenderWarehouse?.mapLocation,
+        },
+        {
+          description:
+            "Take from" +
+            nearToSenderWarehouse?.name +
+            "to " +
+            nearToReceiverWarehouse?.name +
+            " warehouse",
+          coordinate: nearToReceiverWarehouse?.mapLocation,
+        },
+        { description: "Deliver Item" },
+      ];
     }
 
-    // try {
-    //   const newOrder = await prisma.order.create({
-    //     data: {
-    //       senderCustomerId: Number(session?.customerData.id),
-    //       dropOffPhysicalLocation: dropOffLocation,
-    //       dropOffMapLocation: dropOffMapAddress,
-    //       orderStatus: "UNCLAIMED",
-    //       packageType: packageType as PackageType,
-    //       paymentStatus: false,
-    //       pickUpMapLocation: mapAddress,
-    //       pickUpPhysicalLocation: pickUpLocation,
-    //       dropOffTime: new Date(dropOffTime),
-    //       pickUpTime: new Date(pickUpTime),
-    //       receiverCustomerId: receiverId ? Number(receiverId) : null,
-    //       receiverEmail: receiverId ? null : receiverEmail,
-    //       receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
-    //       receiverName: receiverId ? null : receiverUsername,
-    //       isInCity: inbound,
-    //       orderMilestone: {
-    //         createMany: {
-    //           data: [
-    //             ...orderMilestones?.map((milestone) => {
-    //               return {
-    //                 description: milestone,
-    //               };
-    //             }),
-    //           ],
-    //         },
-    //       },
-    //     },
-    //   });
+    try {
+      const newOrder = await prisma.order.create({
+        data: {
+          senderCustomerId: Number(session?.customerData.id),
+          dropOffPhysicalLocation: dropOffLocation,
+          dropOffMapLocation: dropOffMapAddress,
+          orderStatus: "UNCLAIMED",
+          packageType: packageType as PackageType,
+          paymentStatus: false,
+          pickUpMapLocation: mapAddress,
+          pickUpPhysicalLocation: pickUpLocation,
+          dropOffTime: new Date(dropOffTime),
+          pickUpTime: new Date(pickUpTime),
+          receiverCustomerId: receiverId ? Number(receiverId) : null,
+          receiverEmail: receiverId ? null : receiverEmail,
+          receiverPhoneNumber: receiverId ? null : receiverPhoneNumber,
+          receiverName: receiverId ? null : receiverUsername,
+          isInCity: inbound,
+          orderMilestone: {
+            createMany: {
+              data: [
+                ...orderMilestones?.map((milestone) => {
+                  return {
+                    description: milestone.description,
+                    coordinate: milestone.coordinate,
+                  };
+                }),
+              ],
+            },
+          },
+        },
+      });
 
-    //   // const emailSentToSender = await sendMail(
-    //   //   session?.userData.email ?? "",
-    //   //   "Your order has been created",
-    //   //   `Your order with id ${newOrder.id}is going to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
-    //   // );
-    //   if (!newOrder.receiverCustomerId) {
-    //     console.log(newOrder.receiverEmail);
-    //     const emailSentToReceiver = await sendMail(
-    //       newOrder.receiverEmail ?? "",
-    //       "Order coming to you has been created.",
-    //       `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
-    //     );
-    //   } else {
-    //     const user = await prisma.customer.findFirst({
-    //       where: {
-    //         id: newOrder.receiverCustomerId,
-    //       },
-    //       include: {
-    //         User: true,
-    //       },
-    //     });
-    //     console.log("HELLO: " + user?.User.email);
-    //     const emailSentToReceiver = await sendMail(
-    //       user?.User.email ?? "",
-    //       "Order coming to you has been created.",
-    //       `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
-    //     );
-    //   }
-    //   console.log({ newOrder });
+      if (!newOrder.receiverCustomerId) {
+        console.log(newOrder.receiverEmail);
+        const emailSentToReceiver = await sendMail(
+          newOrder.receiverEmail ?? "",
+          "Order coming to you has been created.",
+          `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
+        );
+      } else {
+        const user = await prisma.customer.findFirst({
+          where: {
+            id: newOrder.receiverCustomerId,
+          },
+          include: {
+            User: true,
+          },
+        });
+        console.log("HELLO: " + user?.User.email);
+        const emailSentToReceiver = await sendMail(
+          user?.User.email ?? "",
+          "Order coming to you has been created.",
+          `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
+        );
+      }
+      console.log({ newOrder });
 
-    //   return { newOrder };
-    // } catch (error) {
-    //   console.log(error as Error);
-    //   throw fail(500, { errorMessage: "Cant make order!" });
-    // }
+      return { newOrder };
+    } catch (error) {
+      console.log(error as Error);
+      throw fail(500, { errorMessage: "Cant make order!" });
+    }
   },
   searchCustomer: async (event) => {
     const data = await event.request.formData();

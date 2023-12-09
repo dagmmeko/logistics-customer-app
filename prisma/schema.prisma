@@ -184,6 +184,7 @@ model OrderMilestone {
   id          Int       @id @default(autoincrement())
   orderId     Int
   description String
+  coordinates String?
   createdAt   DateTime  @default(now())
   updateAt    DateTime  @updatedAt
   deletedAt   DateTime?
@@ -445,6 +446,35 @@ model TicketFile {
 
   @@index([ticketId])
   @@index([fileId])
+}
+
+model Chat {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  deletedAt DateTime?
+}
+
+model ChatMembers {
+  id         Int @id @default(autoincrement())
+  chatId     Int
+  employeeId Int
+
+  @@unique([chatId, employeeId])
+  @@index([employeeId])
+}
+
+model Message {
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime
+  deletedAt        DateTime?
+  text             String
+  senderEmployeeId Int
+  chatId           Int
+
+  @@index([chatId])
+  @@index([senderEmployeeId])
 }
 
 enum EmployeeStatus {

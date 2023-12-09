@@ -143,7 +143,6 @@
     <ReceiverInfo
       bind:form
       bind:receiversInfo
-      showMap={componentsOrder === 2}
       class={componentsOrder === 2 ? "" : "hidden"}
       on:back={() => {
         if (componentsOrder > 1) {

@@ -108,7 +108,6 @@
 
   <SenderInfo
     disableInput={true}
-    showMap={componentsOrder === 1}
     class={componentsOrder === 1 ? "" : "hidden"}
     bind:senderInfo
     on:back={() => {
@@ -125,7 +124,6 @@
   <ReceiverInfo
     disableInput={true}
     bind:receiversInfo
-    showMap={componentsOrder === 2}
     class={componentsOrder === 2 ? "" : "hidden"}
     on:back={() => {
       if (componentsOrder > 1) {

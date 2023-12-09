@@ -1,16 +1,12 @@
 <script lang="ts">
-  import { controls } from "@beyonk/svelte-mapbox";
-  import { PUBLIC_MAPBOX_TOKEN } from "$env/static/public";
-  import Add from "$lib/assets/shared/add.svg.svelte";
-  import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
-  import { createEventDispatcher } from "svelte";
-  import Search from "$lib/assets/shared/search.svg.svelte";
-  import type { ActionData } from "./$types";
   import { enhance } from "$app/forms";
-  import Map from "$lib/components/map.svelte";
-  import { browser } from "$app/environment";
-  import { custom } from "zod";
+  import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
+  import Add from "$lib/assets/shared/add.svg.svelte";
+  import Search from "$lib/assets/shared/search.svg.svelte";
   import GoogleMaps from "$lib/components/google-maps.svelte";
+  import { controls } from "@beyonk/svelte-mapbox";
+  import { createEventDispatcher } from "svelte";
+  import type { ActionData } from "./$types";
   let dateInput: any;
 
   let className = "";
