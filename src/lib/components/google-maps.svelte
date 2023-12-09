@@ -106,11 +106,9 @@
 </script>
 
 <div id="map" class="w-full h-72" />
-{#if display}
-  <input
-    id="pac-input"
-    class="w-full control p-3 text-sm mt-4 rounded"
-    type="text"
-    placeholder="Bole, Merkato, ...."
-  />
-{/if}
+<input
+  id="pac-input"
+  class="w-full control p-3 text-sm mt-4 rounded"
+  type="text"
+  placeholder="Bole, Merkato, ...."
+/>

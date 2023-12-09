@@ -113,9 +113,9 @@
   <div class="bg-tableHeaderBg p-3 rounded-md">
     <div class="h-fit flex-1">
       {#if lat && lng}
-        <GoogleMaps bind:lat bind:lng />
+        <GoogleMaps bind:lat bind:lng display={false} />
         <input
-          value={`${lng},${lat}`}
+          value={`${lat},${lng}`}
           class="input max-w-md"
           type="text"
           name="mapAddress"

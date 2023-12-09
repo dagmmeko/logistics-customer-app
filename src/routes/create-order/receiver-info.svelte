@@ -239,7 +239,7 @@
     </div>
     <input
       disabled={disableInput}
-      value={`${lng2},${lat2}`}
+      value={`${lat2},${lng2}`}
       class="input max-w-md"
       type="text"
       name="dropOffMapAddress"
