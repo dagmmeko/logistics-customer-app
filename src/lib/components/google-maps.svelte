@@ -2,18 +2,22 @@
   import { Loader } from "@googlemaps/js-api-loader";
   import { browser } from "$app/environment";
   import { PUBLIC_GOOGLE_MAPS_API } from "$env/static/public";
+
   export let lat: number;
   export let lng: number;
   export let destinationLat: number = 0;
   export let destinationLng: number = 0;
   export let display: boolean = false;
+
+  export let pickRegion: boolean = false;
+  export let regionPageCoordinates: [number, number][] = [];
+
   $: if (browser) {
     const loader = new Loader({
       apiKey: PUBLIC_GOOGLE_MAPS_API,
       version: "weekly",
     });
 
-    console.log({ destinationLat, destinationLng });
     loader.importLibrary("places").then(async () => {
       const { Map } = (await google.maps.importLibrary(
         "maps"
@@ -25,12 +29,39 @@
         mapTypeId: "roadmap",
         disableDefaultUI: true,
       });
-      const marker = new google.maps.Marker({
-        position: { lat: lat, lng: lng },
-        map,
-      });
 
-      if (display) {
+      // google.maps.event.addListener(regionArea, 'click', function () {
+      // 	var polygonPaths = this.getPaths();
+      // });
+      let regionCoordinates: { lat: number; lng: number }[] = [];
+
+      if (pickRegion) {
+        map.addListener("click", (e: any) => {
+          regionCoordinates = [
+            ...regionCoordinates,
+            { lat: e.latLng.lat(), lng: e.latLng.lng() },
+          ];
+          regionPageCoordinates = [
+            ...regionCoordinates.map(
+              (coordinate) =>
+                [coordinate.lat, coordinate.lng] as [number, number]
+            ),
+          ];
+          const regionArea = new google.maps.Polygon({
+            paths: regionCoordinates,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 3,
+            fillColor: "#FF0000",
+            fillOpacity: 0.35,
+          });
+          regionArea.setMap(map);
+        });
+      } else if (display) {
+        const marker = new google.maps.Marker({
+          position: { lat: lat, lng: lng },
+          map,
+        });
         const marker2 = new google.maps.Marker({
           position: { lat: destinationLat, lng: destinationLng },
           map,
@@ -46,6 +77,10 @@
         // Adjust the map's viewport to fit the bounds
         map.fitBounds(bounds);
       } else {
+        const marker = new google.maps.Marker({
+          position: { lat: lat, lng: lng },
+          map,
+        });
         map.addListener("click", (e: any) => {
           markers.forEach((marker) => {
             marker.setMap(null);

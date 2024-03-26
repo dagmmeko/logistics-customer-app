@@ -184,11 +184,11 @@ model OrderMilestone {
   id          Int       @id @default(autoincrement())
   orderId     Int
   description String
-  coordinates String?
   createdAt   DateTime  @default(now())
   updateAt    DateTime  @updatedAt
   deletedAt   DateTime?
   isCompleted Boolean   @default(false)
+  coordinates String?
   Order       Order     @relation(fields: [orderId], references: [id])
 
   @@index([orderId])

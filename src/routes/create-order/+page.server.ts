@@ -92,13 +92,17 @@ export const actions = {
         receiverPoint,
         warehousePoints
       );
+
       const nearestToSender = turf.nearestPoint(senderPoint, warehousePoints);
 
-      const nearToReceiverWarehouse = warehouses.find(
-        (w) =>
-          w.mapLocation ===
+      const nearToReceiverWarehouse = warehouses.find((w) => {
+        return (
+          `${Number(w.mapLocation.split(",")[0])}, ${Number(
+            w.mapLocation.split(",")[1]
+          )}` ===
           `${nearestToReceiver.geometry.coordinates[0]}, ${nearestToReceiver.geometry.coordinates[1]}`
-      );
+        );
+      });
 
       const nearToSenderWarehouse = warehouses.find(
         (w) =>
@@ -116,16 +120,22 @@ export const actions = {
         },
         {
           description:
-            "Take from" +
+            "Take from " +
             nearToSenderWarehouse?.name +
-            "to " +
+            " to " +
             nearToReceiverWarehouse?.name +
             " warehouse",
           coordinate: nearToReceiverWarehouse?.mapLocation,
         },
+        {
+          description: "Take to drop off",
+          coordinate: dropOffMapAddress,
+        },
         { description: "Deliver Item" },
       ];
     }
+
+    console.log({ orderMilestones });
 
     try {
       const newOrder = await prisma.order.create({
@@ -161,7 +171,6 @@ export const actions = {
       });
 
       if (!newOrder.receiverCustomerId) {
-        console.log(newOrder.receiverEmail);
         const emailSentToReceiver = await sendMail(
           newOrder.receiverEmail ?? "",
           "Order coming to you has been created.",
@@ -176,14 +185,12 @@ export const actions = {
             User: true,
           },
         });
-        console.log("HELLO: " + user?.User.email);
         const emailSentToReceiver = await sendMail(
           user?.User.email ?? "",
           "Order coming to you has been created.",
           `An order with id ${newOrder.id} from ${session?.userData.userName}, (${session?.userData.phoneNumber}) is coming to ${newOrder.dropOffPhysicalLocation} from ${newOrder.pickUpPhysicalLocation}`
         );
       }
-      console.log({ newOrder });
 
       return { newOrder };
     } catch (error) {

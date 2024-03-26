@@ -6,9 +6,8 @@
 
   export let data;
   let [mapLng, mapLat] = data.orderDetail?.pickUpMapLocation.split(",") || [];
-  let [destinationLng, destinationLat] =
+  let [destinationLat, destinationLng] =
     data.orderDetail?.dropOffMapLocation.split(",") || [];
-  $: console.log({ mapLat, mapLng });
 </script>
 
 <div class=" mt-8 mb-16 grid justify-center">
