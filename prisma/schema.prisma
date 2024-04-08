@@ -68,17 +68,21 @@ model Employee {
 }
 
 model Vehicles {
-  id          Int                  @id @default(autoincrement())
-  employeeId  Int
-  plateNo     String
-  brand       String
-  vehicleType Vehicles_vehicleType
-  createdAt   DateTime             @default(now())
-  deletedAt   DateTime?
-  updateAt    DateTime?            @updatedAt
-  Employee    Employee             @relation(fields: [employeeId], references: [id])
+  id                 Int                  @id @default(autoincrement())
+  employeeId         Int?
+  plateNo            String
+  brand              String
+  vehicleType        Vehicles_vehicleType
+  createdAt          DateTime             @default(now())
+  deletedAt          DateTime?
+  updateAt           DateTime?            @updatedAt
+  vendorHasDriver    Boolean              @default(false)
+  vendorId           Int?
+  vehicleDescription String?
+  Employee           Employee?            @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
+  @@index([vendorId])
 }
 
 model Suspended {
@@ -112,6 +116,8 @@ model Customer {
   id              Int           @id @default(autoincrement())
   userId          Int           @unique
   customerType    CustomerType?
+  companyName     String?
+  tinNumber       String?
   premium         Boolean?
   physicalAddress String?
   mapAddress      String?
@@ -477,6 +483,23 @@ model Message {
   @@index([senderEmployeeId])
 }
 
+model Vendor {
+  id            Int               @id @default(autoincrement())
+  email         String
+  phoneNumber   String
+  address       String
+  createdAt     DateTime          @default(now())
+  updateAt      DateTime
+  deletedAt     DateTime?
+  vendorType    Vendor_vendorType
+  description   String?
+  fileId        Int               @unique
+  companyName   String            @default("Unknown")
+  contactPerson String            @default("Unknown")
+
+  @@index([fileId])
+}
+
 enum EmployeeStatus {
   Full_Time
   Part_Time
@@ -560,4 +583,11 @@ enum Employee_activityStatus {
   UNASSIGNED
   SUSPENDED
   TERMINATED
+}
+
+enum Vendor_vendorType {
+  WAREHOUSE
+  VEHICLES
+  STATION
+  OTHERS
 }

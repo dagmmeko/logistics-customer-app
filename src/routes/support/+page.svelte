@@ -18,24 +18,44 @@
       <div
         class="bg-tableHeaderBg/50 shadow-sm w-auto rounded-md p-4 my-2 grid"
       >
-        <div class="flex items-center justify-between gap-4">
+        <div class="text-gray7">Ticket ID: {ticket.id}</div>
+        <div class="flex items-center justify-between gap-4 mt-2">
           <span class=" text-xl font-medium"> {ticket.title}</span>
           <span class="text-[10px] font-medium text-black/60 mt-1">
             {ticket.ticketStatus}
           </span>
         </div>
+        <div class="flex gap-10 mt-2">
+          {#if ticket.AssignedTo !== null}
+            <div class="flex items-center">
+              <p>Assigned To</p>
+              <p class="text-sm ml-1">
+                {ticket.AssignedTo?.User.userName}
+              </p>
+            </div>
+          {/if}
+          {#if ticket.dueDate}
+            <div class="flex items-center">
+              <p>Due Date:</p>
+              <p class="text-sm ml-1">
+                {dayjs(ticket.dueDate).format("DD MM YY")}
+              </p>
+            </div>
+          {/if}
+        </div>
 
-        <p class="text-sm mt-1">
-          {ticket.ticketStatus !== "UNASSIGNED"
-            ? "Assigned to: " + ticket.AssignedTo?.User.userName
-            : ""}
-        </p>
-        <p class="text-sm mt-1">
-          {ticket.ticketStatus !== "UNASSIGNED"
-            ? "Due Date: " + dayjs(ticket.dueDate).format("DD MM YY")
-            : ""}
-        </p>
-        <p class="mt-1 line-clamp-3">{ticket.description}</p>
+        <div class="">
+          <p class="font-semibold text-orderCardText">Description</p>
+
+          <p class=" line-clamp-3">{ticket.description}</p>
+        </div>
+        {#if ticket.resolution !== null}
+          <div class="mt-2">
+            <p class="font-semibold text-orderCardText">Solution</p>
+
+            <p>{ticket.resolution}</p>
+          </div>
+        {/if}
       </div>
     {/each}
   </div>

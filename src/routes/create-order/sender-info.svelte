@@ -78,8 +78,8 @@
 
   <label>
     <div class="label">
-      Pick up time <span class="text-lg font-semibold text-complementary"
-        >*</span
+      Preferred pick up time <span
+        class="text-lg font-semibold text-complementary">*</span
       >
     </div>
     <input

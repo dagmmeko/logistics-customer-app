@@ -13,6 +13,8 @@ const customerInformationSchema = z.object({
   premium: z.boolean().optional(),
   physicalAddress: z.string().optional(),
   mapAddress: z.string().optional(),
+  companyName: z.string().optional(),
+  tin: z.string().optional(),
 });
 
 export type customerInformationType = z.infer<typeof customerInformationSchema>;
@@ -41,6 +43,8 @@ export const load = async (event) => {
       premium: data.Customer?.premium ?? undefined,
       mapAddress: data.Customer?.mapAddress ?? undefined,
       physicalAddress: data.Customer?.physicalAddress ?? undefined,
+      companyName: data.Customer?.companyName ?? undefined,
+      tin: data.Customer?.tinNumber ?? undefined,
     } satisfies customerInformationType,
     customerInformationSchema
   );
@@ -80,6 +84,8 @@ export let actions = {
             premium: customerInformationForm.data.premium,
             mapAddress: mapAddress,
             physicalAddress: customerInformationForm.data.physicalAddress,
+            companyName: customerInformationForm.data.companyName,
+            tinNumber: customerInformationForm.data.tin,
           },
         },
       },

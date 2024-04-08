@@ -190,6 +190,28 @@
         <option value={"RESIDENTIAL"}> Residential </option>
       </select>
     </label>
+    {#if $customerInformationForm.customerType === "COMMERCIAL"}
+      <label>
+        <div class="labe">Company Name</div>
+        <input
+          class="input w-72 max-w-sm"
+          type="text"
+          name="companyName"
+          bind:value={$customerInformationForm.companyName}
+          {...$constraints.companyName}
+        />
+      </label>
+      <label>
+        <div class="labe">TIN</div>
+        <input
+          class="input w-72 max-w-sm"
+          type="text"
+          name="tin"
+          bind:value={$customerInformationForm.tin}
+          {...$constraints.tin}
+        />
+      </label>
+    {/if}
 
     <div class="h-fit bg-primary/10 p-2 flex-1">
       <GoogleMaps bind:lng={center[0]} bind:lat={center[1]} />

@@ -6,9 +6,6 @@ export const load = async (event) => {
   const tickets = await prisma.ticket.findMany({
     where: {
       customerId: session?.customerData.id,
-      ticketStatus: {
-        not: "COMPLETED",
-      },
     },
     include: {
       AssignedTo: {
