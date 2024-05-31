@@ -36,8 +36,8 @@
   };
   let packageTemp: PackageType;
 
-  // $: form?.newOrder ? toast.push("Order Created") : null;
-  // $: form?.newOrder ? goto("/") : null;
+  $: form?.newOrder ? toast.push("Order Created") : null;
+  $: form?.newOrder ? goto("/") : null;
 </script>
 
 <div class=" mt-6 w-full grid items-center justify-center">
