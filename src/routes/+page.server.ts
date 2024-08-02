@@ -4,8 +4,6 @@ import { redirect } from "@sveltejs/kit";
 export const load = async (event) => {
   const search = event.url.searchParams.get("searchOrder");
 
-  console.log({ search });
-
   const session =
     (await event.locals.getSession()) as EnhancedSessionType | null;
 
@@ -41,8 +39,6 @@ export const load = async (event) => {
       createdAt: "desc",
     },
   });
-
-  console.log({ myOrders });
 
   return { myOrders };
 };

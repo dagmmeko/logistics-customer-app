@@ -48,6 +48,7 @@ model Employee {
   jobTitle              String
   staffIdNumber         String
   employeeStatus        EmployeeStatus          @default(Full_Time)
+  fcmToken              String?
   User                  User                    @relation(fields: [userId], references: [id])
   Role                  Role                    @relation(fields: [roleId], references: [id])
   selections            Selection[]
@@ -116,14 +117,14 @@ model Customer {
   id              Int           @id @default(autoincrement())
   userId          Int           @unique
   customerType    CustomerType?
-  companyName     String?
-  tinNumber       String?
   premium         Boolean?
   physicalAddress String?
   mapAddress      String?
   createdAt       DateTime      @default(now())
   updateAt        DateTime      @updatedAt
   deletedAt       DateTime?
+  companyName     String?
+  tinNumber       String?
   User            User          @relation(fields: [userId], references: [id])
   SentOrders      Order[]       @relation("order sender")
   ReceivedOrders  Order[]       @relation("order receiver")
@@ -152,7 +153,7 @@ model Scope {
 }
 
 model Order {
-  id                      Int               @id @default(autoincrement())
+  id                      Int                  @id @default(autoincrement())
   senderCustomerId        Int
   receiverCustomerId      Int?
   receiverName            String?
@@ -168,15 +169,18 @@ model Order {
   paymentStatus           Boolean
   orderStatus             Order_orderStatus
   dispatchId              Int?
-  createdAt               DateTime          @default(now())
-  updateAt                DateTime          @updatedAt
+  createdAt               DateTime             @default(now())
+  updateAt                DateTime             @updatedAt
   deletedAt               DateTime?
-  isInCity                Boolean           @default(false)
+  isInCity                Boolean              @default(false)
   paymentRef              String?
+  paymentAmount           Float?
+  paymentDate             DateTime?
+  paymentMethod           Order_paymentMethod?
   orderMilestone          OrderMilestone[]
-  Sender                  Customer          @relation("order sender", fields: [senderCustomerId], references: [id])
-  Receiver                Customer?         @relation("order receiver", fields: [receiverCustomerId], references: [id])
-  Dispatch                Dispatch?         @relation(fields: [dispatchId], references: [id])
+  Sender                  Customer             @relation("order sender", fields: [senderCustomerId], references: [id])
+  Receiver                Customer?            @relation("order receiver", fields: [receiverCustomerId], references: [id])
+  Dispatch                Dispatch?            @relation(fields: [dispatchId], references: [id])
   Tracker                 Tracker?
   Inventory               Inventory?
   OrderDispatch           OrderDispatch[]
@@ -187,15 +191,17 @@ model Order {
 }
 
 model OrderMilestone {
-  id          Int       @id @default(autoincrement())
-  orderId     Int
-  description String
-  createdAt   DateTime  @default(now())
-  updateAt    DateTime  @updatedAt
-  deletedAt   DateTime?
-  isCompleted Boolean   @default(false)
-  coordinates String?
-  Order       Order     @relation(fields: [orderId], references: [id])
+  id             Int       @id @default(autoincrement())
+  orderId        Int
+  description    String
+  createdAt      DateTime  @default(now())
+  updateAt       DateTime  @updatedAt
+  deletedAt      DateTime?
+  isCompleted    Boolean   @default(false)
+  coordinates    String?
+  warehouseId    Int?
+  executionOrder Int?
+  Order          Order     @relation(fields: [orderId], references: [id])
 
   @@index([orderId])
 }
@@ -459,6 +465,7 @@ model Chat {
   createdAt DateTime  @default(now())
   updatedAt DateTime
   deletedAt DateTime?
+  chatName  String?
 }
 
 model ChatMembers {
@@ -497,6 +504,17 @@ model Vendor {
   companyName   String            @default("Unknown")
   contactPerson String            @default("Unknown")
 
+  @@index([fileId])
+}
+
+model EmployeeFile {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  fileId     Int
+  employeeId Int
+
+  @@index([employeeId])
   @@index([fileId])
 }
 
@@ -590,4 +608,9 @@ enum Vendor_vendorType {
   VEHICLES
   STATION
   OTHERS
+}
+
+enum Order_paymentMethod {
+  CASH
+  CHAPA
 }

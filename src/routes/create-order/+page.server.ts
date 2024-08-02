@@ -40,8 +40,6 @@ export const actions = {
       return fail(400, { errorMessage: "Invalid data" });
     }
 
-    console.log("create order");
-
     let inbound = false;
 
     const session =
@@ -56,18 +54,29 @@ export const actions = {
       },
     });
 
-    let isInside;
-    let orderMilestones: { description: string; coordinate?: string }[] = [];
+    let orderMilestones: {
+      description: string;
+      coordinate?: string;
+      warehouseId?: number;
+    }[] = [];
+
     if (inCity === "0") {
       inbound = true;
       orderMilestones = [
-        { description: "Pick up from Sender", coordinate: mapAddress },
-        { description: "Take to drop off", coordinate: dropOffMapAddress },
+        {
+          description: `Pick up from Sender - ${pickUpLocation}`,
+          coordinate: mapAddress,
+        },
+        {
+          description: `Take to drop off - ${dropOffLocation}`,
+          coordinate: dropOffMapAddress,
+        },
         { description: "Deliver Item" },
       ];
     } else {
       const orderLocation = mapAddress.split(",");
       const receiverLocation = dropOffMapAddress.split(",");
+
       const receiverPoint = turf.point([
         Number(receiverLocation[0]),
         Number(receiverLocation[1]),
@@ -110,10 +119,11 @@ export const actions = {
           `${nearestToSender.geometry.coordinates[0]}, ${nearestToSender.geometry.coordinates[1]}`
       );
 
-      console.log({ nearToReceiverWarehouse, nearToSenderWarehouse });
-
       orderMilestones = [
-        { description: "Pick up from Sender", coordinate: mapAddress },
+        {
+          description: `Pick up from Sender - ${pickUpLocation}`,
+          coordinate: mapAddress,
+        },
         {
           description: "Take to " + nearToSenderWarehouse?.name + " warehouse",
           coordinate: nearToSenderWarehouse?.mapLocation,
@@ -126,16 +136,15 @@ export const actions = {
             nearToReceiverWarehouse?.name +
             " warehouse",
           coordinate: nearToReceiverWarehouse?.mapLocation,
+          warehouseId: nearToReceiverWarehouse?.id,
         },
         {
-          description: "Take to drop off",
+          description: `Take to drop off - ${dropOffLocation}`,
           coordinate: dropOffMapAddress,
         },
         { description: "Deliver Item" },
       ];
     }
-
-    console.log({ orderMilestones });
 
     try {
       const newOrder = await prisma.order.create({

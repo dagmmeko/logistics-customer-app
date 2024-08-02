@@ -29,7 +29,6 @@ export const load = async (event) => {
     throw new Error("Order Id not found!");
   }
 
-  console.log("load");
   const orderDetail = await prisma.order.findFirst({
     where: {
       id: Number(event.params.orderId),
@@ -56,6 +55,7 @@ export const load = async (event) => {
     } satisfies addPaymentType,
     addPaymentSchema
   );
+  console.log(orderDetail);
 
   let verifyPayment;
   const verifyPaymentResponse = await fetch(
@@ -69,6 +69,7 @@ export const load = async (event) => {
     }
   );
   await verifyPaymentResponse.json().then((res) => {
+    console.log(res);
     verifyPayment = res.data;
   });
 
@@ -167,13 +168,14 @@ export let actions = {
         },
         data: {
           paymentRef: tx_ref,
+          paymentMethod: "CHAPA",
+          paymentDate: new Date(),
+          paymentAmount: 100,
         },
       });
     } catch (error) {
       console.log(error as Error);
     }
-
-    console.log({ checkoutUrl });
 
     return { checkoutUrl, addPaymentForm };
   },
