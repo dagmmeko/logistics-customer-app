@@ -5,9 +5,10 @@
   import Barcode from "svelte-barcode";
 
   export let data;
-  let [mapLng, mapLat] = data.orderDetail?.pickUpMapLocation.split(",") || [];
+  let [mapLat, mapLng] = data.orderDetail?.pickUpMapLocation.split(",") || [];
   let [destinationLat, destinationLng] =
     data.orderDetail?.dropOffMapLocation.split(",") || [];
+  $: console.log(destinationLat, destinationLng, mapLat, mapLng);
 </script>
 
 <div class=" mt-8 mb-16 grid justify-center">
