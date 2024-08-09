@@ -116,8 +116,10 @@ export const actions = {
       const nearToSenderWarehouse = warehouses.find(
         (w) =>
           w.mapLocation ===
-          `${nearestToSender.geometry.coordinates[0]}, ${nearestToSender.geometry.coordinates[1]}`
+          `${nearestToSender.geometry.coordinates[0]},${nearestToSender.geometry.coordinates[1]}`
       );
+
+      console.log(warehousePoints, nearToSenderWarehouse, nearestToSender);
 
       orderMilestones = [
         {
@@ -145,6 +147,8 @@ export const actions = {
         { description: "Deliver Item" },
       ];
     }
+
+    console.log(orderMilestones);
 
     try {
       const newOrder = await prisma.order.create({

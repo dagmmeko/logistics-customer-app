@@ -40,7 +40,7 @@
             <label>
               <input
                 disabled
-                value={milestone.isCompleted}
+                checked={milestone.isCompleted}
                 type="checkbox"
                 class="mr-2"
                 name="milestones"
