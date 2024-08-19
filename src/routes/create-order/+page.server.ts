@@ -129,6 +129,7 @@ export const actions = {
         {
           description: "Take to " + nearToSenderWarehouse?.name + " warehouse",
           coordinate: nearToSenderWarehouse?.mapLocation,
+          warehouseId: nearToSenderWarehouse?.id,
         },
         {
           description:
@@ -175,6 +176,7 @@ export const actions = {
                   return {
                     description: milestone.description,
                     coordinates: milestone.coordinate,
+                    warehouseId: milestone.warehouseId || null,
                   };
                 }),
               ],
