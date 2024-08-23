@@ -8,7 +8,8 @@
   let [mapLat, mapLng] = data.orderDetail?.pickUpMapLocation.split(",") || [];
   let [destinationLat, destinationLng] =
     data.orderDetail?.dropOffMapLocation.split(",") || [];
-  $: console.log(destinationLat, destinationLng, mapLat, mapLng);
+  let [deliveryLat, deliveryLng] =
+    data.orderDetail?.Tracker?.mapLocation.split(",") || [];
 </script>
 
 <div class=" mt-8 mb-16 grid justify-center">
@@ -85,6 +86,8 @@
         destinationLng={Number(destinationLng)}
         lng={Number(mapLng)}
         lat={Number(mapLat)}
+        deliveryLat={Number(deliveryLat)}
+        deliveryLng={Number(deliveryLng)}
       />
       <div class="font-semibold w-full text-lg mt-4">Pick Up</div>
 

@@ -2,15 +2,17 @@
   import { Loader } from "@googlemaps/js-api-loader";
   import { browser } from "$app/environment";
   import { PUBLIC_GOOGLE_MAPS_API } from "$env/static/public";
+  import deliveryMarker from "$lib/assets/shared/map/delivery.svg";
+  import dropOffIcon from "$lib/assets/shared/map/drop-off.svg";
+  import pickUp from "$lib/assets/shared/map/pick-up.svg";
 
   export let lat: number;
   export let lng: number;
   export let destinationLat: number = 0;
   export let destinationLng: number = 0;
+  export let deliveryLat: number = 0;
+  export let deliveryLng: number = 0;
   export let display: boolean = false;
-
-  export let pickRegion: boolean = false;
-  export let regionPageCoordinates: [number, number][] = [];
 
   $: if (browser) {
     const loader = new Loader({
@@ -30,41 +32,22 @@
         disableDefaultUI: true,
       });
 
-      // google.maps.event.addListener(regionArea, 'click', function () {
-      // 	var polygonPaths = this.getPaths();
-      // });
-      let regionCoordinates: { lat: number; lng: number }[] = [];
-
-      if (pickRegion) {
-        map.addListener("click", (e: any) => {
-          regionCoordinates = [
-            ...regionCoordinates,
-            { lat: e.latLng.lat(), lng: e.latLng.lng() },
-          ];
-          regionPageCoordinates = [
-            ...regionCoordinates.map(
-              (coordinate) =>
-                [coordinate.lat, coordinate.lng] as [number, number]
-            ),
-          ];
-          const regionArea = new google.maps.Polygon({
-            paths: regionCoordinates,
-            strokeColor: "#FF0000",
-            strokeOpacity: 0.8,
-            strokeWeight: 3,
-            fillColor: "#FF0000",
-            fillOpacity: 0.35,
-          });
-          regionArea.setMap(map);
-        });
-      } else if (display) {
+      if (display) {
         const marker = new google.maps.Marker({
           position: { lat: lat, lng: lng },
           map,
+          icon: {
+            url: pickUp,
+            scaledSize: new google.maps.Size(40, 40),
+          },
         });
         const marker2 = new google.maps.Marker({
           position: { lat: destinationLat, lng: destinationLng },
           map,
+          icon: {
+            url: dropOffIcon,
+            scaledSize: new google.maps.Size(40, 40),
+          },
         });
 
         // Create a new bounds object
@@ -74,6 +57,17 @@
         bounds.extend(marker.getPosition() as google.maps.LatLng);
         bounds.extend(marker2.getPosition() as google.maps.LatLng);
 
+        if (deliveryLat !== 0 && deliveryLng !== 0) {
+          const deliveryManMarker = new google.maps.Marker({
+            position: { lat: deliveryLat, lng: deliveryLng },
+            map,
+            icon: {
+              url: deliveryMarker,
+              scaledSize: new google.maps.Size(40, 40),
+            },
+          });
+          bounds.extend(deliveryManMarker.getPosition() as google.maps.LatLng);
+        }
         // Adjust the map's viewport to fit the bounds
         map.fitBounds(bounds);
       } else {
