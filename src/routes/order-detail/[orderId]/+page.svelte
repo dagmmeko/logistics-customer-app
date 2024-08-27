@@ -1,6 +1,5 @@
 <script lang="ts">
   import GoogleMaps from "$lib/components/google-maps.svelte";
-  import Map from "$lib/components/map.svelte";
   import dayjs from "dayjs";
   import Barcode from "svelte-barcode";
 

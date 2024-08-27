@@ -4,7 +4,6 @@
   import Add from "$lib/assets/shared/add.svg.svelte";
   import Search from "$lib/assets/shared/search.svg.svelte";
   import GoogleMaps from "$lib/components/google-maps.svelte";
-  import { controls } from "@beyonk/svelte-mapbox";
   import { createEventDispatcher } from "svelte";
   import type { ActionData } from "./$types";
   let dateInput: any;

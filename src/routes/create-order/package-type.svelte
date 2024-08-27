@@ -10,7 +10,7 @@
   export { className as class };
   export let packageType: PackageType | null;
   export let disableInput = false;
-  // $: form?.newOrder ? (toast.push("Order Created"), goto("/")) : null;
+  $: form?.newOrder ? (toast.push("Order Created"), goto("/")) : null;
 </script>
 
 <div class="{className} w-96 px-3 mt-4">

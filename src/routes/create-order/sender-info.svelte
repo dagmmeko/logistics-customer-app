@@ -3,7 +3,6 @@
   import Add from "$lib/assets/shared/add.svg.svelte";
   import ArrowRight from "$lib/assets/icons/arrow-right.svg.svelte";
   import { createEventDispatcher } from "svelte";
-  import Map from "$lib/components/map.svelte";
   import { browser } from "$app/environment";
   import { clickOutside } from "$lib/utils/click-outside";
   import GoogleMaps from "$lib/components/google-maps.svelte";

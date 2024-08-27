@@ -59,7 +59,45 @@ export const actions = {
       coordinate?: string;
       warehouseId?: number;
     }[] = [];
+    const orderLocation = mapAddress.split(",");
+    const receiverLocation = dropOffMapAddress.split(",");
+    const receiverPoint = turf.point([
+      Number(receiverLocation[0]),
+      Number(receiverLocation[1]),
+    ]);
+    const senderPoint = turf.point([
+      Number(orderLocation[0]),
+      Number(orderLocation[1]),
+    ]);
+    const warehousePoints = turf.featureCollection([
+      ...warehouses.map((warehouse) => {
+        const warehouseLocation = warehouse.mapLocation.split(",");
 
+        return turf.point([
+          Number(warehouseLocation[0]),
+          Number(warehouseLocation[1]),
+        ]);
+      }),
+    ]);
+
+    const nearestToReceiver = turf.nearestPoint(receiverPoint, warehousePoints);
+
+    const nearestToSender = turf.nearestPoint(senderPoint, warehousePoints);
+
+    const nearToReceiverWarehouse = warehouses.find((w) => {
+      return (
+        `${Number(w.mapLocation.split(",")[0])}, ${Number(
+          w.mapLocation.split(",")[1]
+        )}` ===
+        `${nearestToReceiver.geometry.coordinates[0]}, ${nearestToReceiver.geometry.coordinates[1]}`
+      );
+    });
+
+    const nearToSenderWarehouse = warehouses.find(
+      (w) =>
+        w.mapLocation ===
+        `${nearestToSender.geometry.coordinates[0]},${nearestToSender.geometry.coordinates[1]}`
+    );
     if (inCity === "0") {
       inbound = true;
       orderMilestones = [
@@ -74,53 +112,6 @@ export const actions = {
         { description: "Deliver Item" },
       ];
     } else {
-      const orderLocation = mapAddress.split(",");
-      const receiverLocation = dropOffMapAddress.split(",");
-
-      const receiverPoint = turf.point([
-        Number(receiverLocation[0]),
-        Number(receiverLocation[1]),
-      ]);
-      const senderPoint = turf.point([
-        Number(orderLocation[0]),
-        Number(orderLocation[1]),
-      ]);
-
-      const warehousePoints = turf.featureCollection([
-        ...warehouses.map((warehouse) => {
-          const warehouseLocation = warehouse.mapLocation.split(",");
-
-          return turf.point([
-            Number(warehouseLocation[0]),
-            Number(warehouseLocation[1]),
-          ]);
-        }),
-      ]);
-
-      const nearestToReceiver = turf.nearestPoint(
-        receiverPoint,
-        warehousePoints
-      );
-
-      const nearestToSender = turf.nearestPoint(senderPoint, warehousePoints);
-
-      const nearToReceiverWarehouse = warehouses.find((w) => {
-        return (
-          `${Number(w.mapLocation.split(",")[0])}, ${Number(
-            w.mapLocation.split(",")[1]
-          )}` ===
-          `${nearestToReceiver.geometry.coordinates[0]}, ${nearestToReceiver.geometry.coordinates[1]}`
-        );
-      });
-
-      const nearToSenderWarehouse = warehouses.find(
-        (w) =>
-          w.mapLocation ===
-          `${nearestToSender.geometry.coordinates[0]},${nearestToSender.geometry.coordinates[1]}`
-      );
-
-      console.log(warehousePoints, nearToSenderWarehouse, nearestToSender);
-
       orderMilestones = [
         {
           description: `Pick up from Sender - ${pickUpLocation}`,
