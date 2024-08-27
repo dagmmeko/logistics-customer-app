@@ -75,6 +75,8 @@ export const load = async (event) => {
 
   // @ts-ignore
   if (verifyPayment && verifyPayment.status === "success") {
+    console.log("Payment Verified");
+
     const updateOrder = await prisma.order.update({
       where: {
         id: Number(event.params.orderId),

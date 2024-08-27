@@ -70,6 +70,15 @@
         : data.orderDetail?.Receiver?.User.phoneNumber || ""}
     </div>
   </div>
+  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
+    <span class="font-semibold text-lg">Driver</span>
+    <div class="text-primary font-light">
+      {data.orderDetail?.Dispatch?.AssignedTo.User.userName}
+    </div>
+    <div class="font-light mt-1">
+      {data.orderDetail?.Dispatch?.AssignedTo.User.phoneNumber}
+    </div>
+  </div>
 
   <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
     <span class="font-semibold text-lg">Order Detail</span>

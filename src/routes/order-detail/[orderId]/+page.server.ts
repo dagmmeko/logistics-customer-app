@@ -23,12 +23,29 @@ export const load = async (event) => {
       },
       orderMilestone: true,
       Tracker: true,
+      Dispatch: {
+        where: {
+          OrderDispatches: {
+            every: {
+              dispatchStatus: "INPROGRESS",
+            },
+          },
+        },
+        include: {
+          AssignedTo: {
+            include: {
+              User: true,
+            },
+          },
+        },
+      },
     },
   });
+  //
+  console.log(orderDetail);
 
   if (orderDetail?.orderStatus === "UNCLAIMED" || !orderDetail?.paymentStatus) {
     throw redirect(302, `/finalize-order/${orderDetail?.id}`);
   }
-  console.log(orderDetail.Tracker);
   return { orderDetail };
 };
