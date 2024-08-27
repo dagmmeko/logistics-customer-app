@@ -108,6 +108,7 @@ export const actions = {
         {
           description: `Take to drop off - ${dropOffLocation}`,
           coordinate: dropOffMapAddress,
+          warehouseId: nearToSenderWarehouse?.id,
         },
         { description: "Deliver Item" },
       ];
@@ -198,7 +199,7 @@ export const actions = {
         );
       }
 
-      return { newOrder };
+      return { newOrder: "" };
     } catch (error) {
       console.log(error as Error);
       throw fail(500, { errorMessage: "Cant make order!" });
