@@ -80,10 +80,14 @@ model Vehicles {
   vendorHasDriver    Boolean              @default(false)
   vendorId           Int?
   vehicleDescription String?
+  vehicleOwnerId     Int?
+  vendorDriverId     Int?
   Employee           Employee?            @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
   @@index([vendorId])
+  @@index([vehicleOwnerId])
+  @@index([vendorDriverId])
 }
 
 model Suspended {
@@ -244,6 +248,7 @@ model Warehouse {
   email            String
   shippingAddress  String
   attachment       String?
+  vendorId         Int?
   selections       Selection[]
   inventories      Inventory[]
   region           Region                    @relation(fields: [regionId], references: [id])
@@ -252,14 +257,15 @@ model Warehouse {
   dailySchedules   DailySchedule[]
 
   @@index([regionId])
+  @@index([vendorId])
   @@fulltext([name, mapLocation, phoneNumber])
 }
 
 model DailySchedule {
   id          Int       @id @default(autoincrement())
   day         String
-  startTime   String
-  endTime     String
+  startTime   String?
+  endTime     String?
   warehouseId Int
   isHoliday   Boolean   @default(false)
   Warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
@@ -344,10 +350,12 @@ model Inventory {
   createdAt       DateTime        @default(now())
   updateAt        DateTime        @updatedAt
   deletedAt       DateTime?
+  nextWarehouseId Int?
   Order           Order           @relation(fields: [orderId], references: [id])
   Warehouse       Warehouse       @relation(fields: [wareHouseId], references: [id])
 
   @@index([wareHouseId])
+  @@index([nextWarehouseId])
   @@map("Inventory")
 }
 
@@ -500,7 +508,7 @@ model Vendor {
   deletedAt     DateTime?
   vendorType    Vendor_vendorType
   description   String?
-  fileId        Int               @unique
+  fileId        Int?              @unique
   companyName   String            @default("Unknown")
   contactPerson String            @default("Unknown")
 
@@ -516,6 +524,83 @@ model EmployeeFile {
 
   @@index([employeeId])
   @@index([fileId])
+}
+
+model Suspensions {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  description  String
+  startingDate DateTime
+  endDate      DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([employeeId])
+}
+
+model VehicleOwners {
+  id          Int    @id @default(autoincrement())
+  name        String
+  email       String
+  phoneNumber String
+  address     String
+  vendorId    Int?
+
+  @@index([vendorId])
+}
+
+model VehicleOwnersFile {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  fileId         Int
+  vehicleOwnerId Int
+
+  @@index([fileId])
+  @@index([vehicleOwnerId])
+}
+
+model VendorDriverFile {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  fileId         Int
+  vendorDriverId Int
+
+  @@index([fileId])
+  @@index([vendorDriverId])
+}
+
+model VendorDriverWarehouses {
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime
+  deletedAt      DateTime?
+  vendorDriverId Int
+  warehouseId    Int
+
+  @@index([vendorDriverId])
+  @@index([warehouseId])
+}
+
+model VendorDrivers {
+  id             Int                          @id @default(autoincrement())
+  createdAt      DateTime                     @default(now())
+  updateAt       DateTime
+  deletedAt      DateTime?
+  stationId      Int?
+  isFired        Boolean                      @default(false)
+  activityStatus VendorDrivers_activityStatus
+  hiredDate      DateTime
+  userId         Int                          @unique
+  roleId         Int
+  warehouseId    Int?
+  address        String
+  staffIdNumber  String
+  vendorId       Int?
+
+  @@index([roleId])
+  @@index([userId])
+  @@index([vendorId])
 }
 
 enum EmployeeStatus {
@@ -603,14 +688,20 @@ enum Employee_activityStatus {
   TERMINATED
 }
 
-enum Vendor_vendorType {
-  WAREHOUSE
-  VEHICLES
-  STATION
-  OTHERS
-}
-
 enum Order_paymentMethod {
   CASH
   CHAPA
+}
+
+enum VendorDrivers_activityStatus {
+  ASSIGNED
+  UNASSIGNED
+  SUSPENDED
+  TERMINATED
+}
+
+enum Vendor_vendorType {
+  WAREHOUSE
+  VEHICLE_OWNERS
+  VEHICLE_OPERATORS
 }

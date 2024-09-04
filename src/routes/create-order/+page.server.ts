@@ -136,8 +136,9 @@ export const actions = {
         {
           description: `Take to drop off - ${dropOffLocation}`,
           coordinate: dropOffMapAddress,
+          warehouseId: -1,
         },
-        { description: "Deliver Item" },
+        { description: "Deliver Item", warehouseId: -1 },
       ];
     }
 
