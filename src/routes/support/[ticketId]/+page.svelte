@@ -17,16 +17,16 @@
 </script>
 
 <div class="mx-6 my-4">
-  <div class="bg-gray-500">
+  <div class="">
     <h1 class="text-2xl">
       Ticket <span class="font-bold">{data.ticketDetail?.id}</span> Detail
     </h1>
 
     <div class="flex items-center justify-between gap-4 mt-2">
-      <span class=" text-xl text-orderCardText font-semibold">
+      <span class=" text-2xl text-orderCardText font-semibold">
         {data.ticketDetail?.title}</span
       >
-      <span class="text-[10px] font-medium border-2 p-4 text-black/60 mt-1">
+      <span class="text-xs font-medium text-black/60 mt-1">
         {data.ticketDetail?.ticketStatus}
       </span>
     </div>
@@ -48,15 +48,15 @@
         </div>
       {/if}
     </div>
-    <div class="mt-2">
-      <p class="font-medium">Description</p>
+    <div class="my-2">
+      <p class="font-semibold text-orderCardText">Description</p>
 
-      <p class=" text-sm font-normal line-clamp-3">
+      <p class=" font-normal line-clamp-3">
         {data.ticketDetail?.description || "No Description"}
       </p>
     </div>
     {#if data.ticketDetail?.resolution !== null}
-      <div class="mt-2">
+      <div class="my-2">
         <p class="font-semibold text-orderCardText">Solution</p>
 
         <p>{data.ticketDetail?.resolution}</p>
@@ -64,31 +64,36 @@
     {/if}
   </div>
   {#if data.ticketDetail?.resolution !== null}
-  <div>
-    <div class="text-2xl">Comments</div>
     <div>
-      {#each data.ticketDetail?.Comments as comment}
-        <p>{comment.text} - by - {comment.User.userName} </p>
-      {/each}
-    </div>
-    <form method="post" action="?/addComment" use:addTicketCommentFormEnhance>
-      <label>
-        <div class="label">Comment</div>
-        <textarea
-          class="textarea h-36"
-          bind:value={$addTicketCommentForm.text}
-          name="text"
-        />
-      </label>
-      <button
-        class="bg-secondary flex justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
-        type="submit"
+      <div class="font-semibold text-orderCardText">Comments</div>
+      <div>
+        {#each data.ticketDetail?.Comments || [] as comment}
+          <p>{comment.text} - by - {comment.User.userName}</p>
+        {/each}
+      </div>
+      <form
+        class="mt-4"
+        method="post"
+        action="?/addComment"
+        use:addTicketCommentFormEnhance
       >
-        Submit Comment
-      </button>
-    </form>
-  </div>
+        <label>
+          <div class="label">Comment</div>
+          <textarea
+            class="textarea h-36"
+            bind:value={$addTicketCommentForm.text}
+            name="text"
+          />
+        </label>
+        <button
+          class="bg-secondary flex justify-center items-center rounded-xl h-12 max-w-sm w-full text-white"
+          type="submit"
+        >
+          Submit Comment
+        </button>
+      </form>
+    </div>
   {:else}
-    waiting for solution 
+    <div class="text-sm italic text-gray7">Waiting For Solution</div>
   {/if}
 </div>

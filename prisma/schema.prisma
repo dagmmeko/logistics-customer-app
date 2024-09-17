@@ -23,6 +23,7 @@ model User {
   twoFARequired Boolean        @default(false)
   Employee      Employee?
   Customer      Customer?
+  VendorDrivers VendorDrivers?
   DriverRating  DriverRating[]
   Comments      Comments[]
 
@@ -63,11 +64,50 @@ model Employee {
   AssingedTickets       Ticket[]                @relation("Ticket Assigned To")
   CreatorTickets        Ticket[]                @relation("Ticket Created By")
   Vehicles              Vehicles[]
+  Message               Message[]
+  ChatMembers           ChatMembers[]
+  EmployeeFile          EmployeeFile[]
 
   @@index([roleId])
   @@index([userId])
   @@index([warehouseId])
   @@index([stationId])
+}
+
+model Message {
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  text             String
+  senderEmployeeId Int
+  chatId           Int
+  sender           Employee  @relation(fields: [senderEmployeeId], references: [id])
+  Chat             Chat      @relation(fields: [chatId], references: [id])
+
+  @@index([senderEmployeeId])
+  @@index([chatId])
+}
+
+model Chat {
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  chatName    String?
+  ChatMembers ChatMembers[]
+  Message     Message[]
+}
+
+model ChatMembers {
+  id         Int      @id @default(autoincrement())
+  chatId     Int
+  employeeId Int
+  Chat       Chat     @relation(fields: [chatId], references: [id])
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([chatId, employeeId])
+  @@index([employeeId])
 }
 
 model Vehicles {
@@ -84,12 +124,118 @@ model Vehicles {
   vehicleDescription String?
   vehicleOwnerId     Int?
   vendorDriverId     Int?
+  OwnerVendor        Vendor?              @relation(fields: [vendorId], references: [id])
+  VehicleOwner       VehicleOwners?       @relation(fields: [vehicleOwnerId], references: [id])
   Employee           Employee?            @relation(fields: [employeeId], references: [id])
+  VendorDrivers      VendorDrivers?       @relation(fields: [vendorDriverId], references: [id])
 
-  @@index([employeeId])
-  @@index([vendorId])
   @@index([vehicleOwnerId])
   @@index([vendorDriverId])
+  @@index([employeeId])
+  @@index([vendorId])
+}
+
+model VendorDrivers {
+  id                     Int                      @id @default(autoincrement())
+  createdAt              DateTime                 @default(now())
+  updateAt               DateTime                 @updatedAt
+  deletedAt              DateTime?
+  stationId              Int?
+  isFired                Boolean                  @default(false)
+  activityStatus         Employee_activityStatus
+  hiredDate              DateTime
+  userId                 Int                      @unique
+  roleId                 Int
+  warehouseId            Int?
+  address                String
+  staffIdNumber          String
+  vendorId               Int?
+  Vendor                 Vendor?                  @relation(fields: [vendorId], references: [id])
+  User                   User                     @relation(fields: [userId], references: [id])
+  Role                   Role                     @relation(fields: [roleId], references: [id])
+  Vehicles               Vehicles[]
+  VendorDriverFile       VendorDriverFile[]
+  VendorDriverWarehouses VendorDriverWarehouses[]
+
+  @@index([vendorId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model VendorDriverWarehouses {
+  id             Int           @id @default(autoincrement())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  vendorDriverId Int
+  warehouseId    Int
+  VendorDriver   VendorDrivers @relation(fields: [vendorDriverId], references: [id])
+  Warehouse      Warehouse     @relation(fields: [warehouseId], references: [id])
+
+  @@index([vendorDriverId])
+  @@index([warehouseId])
+}
+
+model VehicleOwners {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  email             String
+  phoneNumber       String
+  address           String
+  vendorId          Int?
+  Vendor            Vendor?             @relation(fields: [vendorId], references: [id])
+  Vehicles          Vehicles[]
+  VehicleOwnersFile VehicleOwnersFile[]
+
+  @@index([vendorId])
+}
+
+model VehicleOwnersFile {
+  id             Int           @id @default(autoincrement())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  fileId         Int
+  vehicleOwnerId Int
+  VehicleOwners  VehicleOwners @relation(fields: [vehicleOwnerId], references: [id], onDelete: Cascade)
+  File           File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([vehicleOwnerId])
+}
+
+model VendorDriverFile {
+  id             Int           @id @default(autoincrement())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  fileId         Int
+  vendorDriverId Int
+  VendorDrivers  VendorDrivers @relation(fields: [vendorDriverId], references: [id], onDelete: Cascade)
+  File           File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([vendorDriverId])
+}
+
+model Vendor {
+  id               Int             @id @default(autoincrement())
+  email            String
+  phoneNumber      String
+  address          String
+  createdAt        DateTime        @default(now())
+  updateAt         DateTime        @updatedAt
+  deletedAt        DateTime?
+  vendorType       VendorType
+  description      String?
+  fileId           Int?            @unique
+  companyName      String          @default("Unknown")
+  contactPerson    String          @default("Unknown")
+  File             File?           @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  OperatorVehicles Vehicles[]
+  VehicleOwners    VehicleOwners[]
+  Warehouse        Warehouse[]
+  VendorDrivers    VendorDrivers[]
+
+  @@index([fileId])
 }
 
 model Suspended {
@@ -140,15 +286,16 @@ model Customer {
 }
 
 model Role {
-  id               Int        @id @default(autoincrement())
-  name             String     @unique
-  description      String     @db.VarChar(500)
-  createdAt        DateTime   @default(now())
-  updateAt         DateTime   @updatedAt
+  id               Int             @id @default(autoincrement())
+  name             String          @unique
+  description      String          @db.VarChar(500)
+  createdAt        DateTime        @default(now())
+  updateAt         DateTime        @updatedAt
   deletedAt        DateTime?
-  isWarehouseAdmin Boolean    @default(false)
+  isWarehouseAdmin Boolean         @default(false)
   Employees        Employee[]
   Scopes           Scope[]
+  VendorDrivers    VendorDrivers[]
 }
 
 model Scope {
@@ -161,7 +308,7 @@ model Scope {
 }
 
 model Order {
-  id                      Int                  @id @default(autoincrement())
+  id                      Int               @id @default(autoincrement())
   senderCustomerId        Int
   receiverCustomerId      Int?
   receiverName            String?
@@ -177,18 +324,18 @@ model Order {
   paymentStatus           Boolean
   orderStatus             Order_orderStatus
   dispatchId              Int?
-  createdAt               DateTime             @default(now())
-  updateAt                DateTime             @updatedAt
+  createdAt               DateTime          @default(now())
+  updateAt                DateTime          @updatedAt
   deletedAt               DateTime?
-  isInCity                Boolean              @default(false)
+  isInCity                Boolean           @default(false)
   paymentRef              String?
   paymentAmount           Float?
   paymentDate             DateTime?
-  paymentMethod           Order_paymentMethod?
+  paymentMethod           PaymentMethod?
   orderMilestone          OrderMilestone[]
-  Sender                  Customer             @relation("order sender", fields: [senderCustomerId], references: [id])
-  Receiver                Customer?            @relation("order receiver", fields: [receiverCustomerId], references: [id])
-  Dispatch                Dispatch?            @relation(fields: [dispatchId], references: [id])
+  Sender                  Customer          @relation("order sender", fields: [senderCustomerId], references: [id])
+  Receiver                Customer?         @relation("order receiver", fields: [receiverCustomerId], references: [id])
+  Dispatch                Dispatch?         @relation(fields: [dispatchId], references: [id])
   Tracker                 Tracker?
   Inventory               Inventory?
   OrderDispatch           OrderDispatch[]
@@ -277,30 +424,33 @@ model Dispatch {
 }
 
 model Warehouse {
-  id               Int                       @id @default(autoincrement())
-  name             String
-  mapLocation      String
-  phoneNumber      String
-  physicalLocation String
-  capacity         Capacity
-  warehouseStatus  Warehouse_warehouseStatus
-  createdAt        DateTime                  @default(now())
-  updateAt         DateTime                  @updatedAt
-  deletedAt        DateTime?
-  regionId         Int
-  email            String
-  shippingAddress  String
-  attachment       String?
-  vendorId         Int?
-  selections       Selection[]
-  inventories      Inventory[]
-  region           Region                    @relation(fields: [regionId], references: [id])
-  Task             Task[]
-  Ticket           Ticket[]
-  dailySchedules   DailySchedule[]
+  id                     Int                       @id @default(autoincrement())
+  name                   String
+  mapLocation            String
+  phoneNumber            String
+  physicalLocation       String
+  capacity               Capacity
+  warehouseStatus        Warehouse_warehouseStatus
+  createdAt              DateTime                  @default(now())
+  updateAt               DateTime                  @updatedAt
+  deletedAt              DateTime?
+  regionId               Int
+  email                  String
+  shippingAddress        String
+  attachment             String?
+  vendorId               Int?
+  Vendor                 Vendor?                   @relation(fields: [vendorId], references: [id])
+  selections             Selection[]
+  inventories            Inventory[]               @relation("Current Warehouse")
+  nextWarehouses         Inventory[]               @relation("Next Warehouse")
+  region                 Region                    @relation(fields: [regionId], references: [id])
+  Task                   Task[]
+  Ticket                 Ticket[]
+  dailySchedules         DailySchedule[]
+  VendorDriverWarehouses VendorDriverWarehouses[]
 
-  @@index([regionId])
   @@index([vendorId])
+  @@index([regionId])
   @@fulltext([name, mapLocation, phoneNumber])
 }
 
@@ -384,6 +534,17 @@ model Selection {
   @@index([employeeId])
 }
 
+model Suspensions {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  description  String
+  startingDate DateTime
+  endDate      DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([employeeId])
+}
+
 model Inventory {
   id              Int             @id @default(autoincrement())
   orderId         Int             @unique
@@ -395,7 +556,8 @@ model Inventory {
   deletedAt       DateTime?
   nextWarehouseId Int?
   Order           Order           @relation(fields: [orderId], references: [id])
-  Warehouse       Warehouse       @relation(fields: [wareHouseId], references: [id])
+  Warehouse       Warehouse       @relation("Current Warehouse", fields: [wareHouseId], references: [id])
+  NextWarehouse   Warehouse?      @relation("Next Warehouse", fields: [nextWarehouseId], references: [id])
 
   @@index([wareHouseId])
   @@index([nextWarehouseId])
@@ -489,14 +651,18 @@ model Comments {
 }
 
 model File {
-  id         Int          @id @default(autoincrement())
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime?
-  deletedAt  DateTime?
-  fileName   String
-  key        String
-  TicketFile TicketFile[]
-  TaskFile   TaskFile?
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime?
+  deletedAt         DateTime?
+  fileName          String
+  key               String
+  TicketFile        TicketFile[]
+  EmployeeFile      EmployeeFile[]
+  TaskFile          TaskFile?
+  Vendor            Vendor?
+  VendorDriverFile  VendorDriverFile[]
+  VehicleOwnersFile VehicleOwnersFile[]
 }
 
 model TaskFile {
@@ -513,6 +679,19 @@ model TaskFile {
   @@index([fileId])
 }
 
+model EmployeeFile {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  fileId     Int
+  employeeId Int
+  Employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  File       File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([employeeId])
+}
+
 model TicketFile {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -525,141 +704,6 @@ model TicketFile {
 
   @@index([ticketId])
   @@index([fileId])
-}
-
-model Chat {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime
-  deletedAt DateTime?
-  chatName  String?
-}
-
-model ChatMembers {
-  id         Int @id @default(autoincrement())
-  chatId     Int
-  employeeId Int
-
-  @@unique([chatId, employeeId])
-  @@index([employeeId])
-}
-
-model Message {
-  id               Int       @id @default(autoincrement())
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime
-  deletedAt        DateTime?
-  text             String
-  senderEmployeeId Int
-  chatId           Int
-
-  @@index([chatId])
-  @@index([senderEmployeeId])
-}
-
-model Vendor {
-  id            Int               @id @default(autoincrement())
-  email         String
-  phoneNumber   String
-  address       String
-  createdAt     DateTime          @default(now())
-  updateAt      DateTime
-  deletedAt     DateTime?
-  vendorType    Vendor_vendorType
-  description   String?
-  fileId        Int?              @unique
-  companyName   String            @default("Unknown")
-  contactPerson String            @default("Unknown")
-
-  @@index([fileId])
-}
-
-model EmployeeFile {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime
-  fileId     Int
-  employeeId Int
-
-  @@index([employeeId])
-  @@index([fileId])
-}
-
-model Suspensions {
-  id           Int      @id @default(autoincrement())
-  employeeId   Int
-  description  String
-  startingDate DateTime
-  endDate      DateTime
-  createdAt    DateTime @default(now())
-
-  @@index([employeeId])
-}
-
-model VehicleOwners {
-  id          Int    @id @default(autoincrement())
-  name        String
-  email       String
-  phoneNumber String
-  address     String
-  vendorId    Int?
-
-  @@index([vendorId])
-}
-
-model VehicleOwnersFile {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime
-  fileId         Int
-  vehicleOwnerId Int
-
-  @@index([fileId])
-  @@index([vehicleOwnerId])
-}
-
-model VendorDriverFile {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime
-  fileId         Int
-  vendorDriverId Int
-
-  @@index([fileId])
-  @@index([vendorDriverId])
-}
-
-model VendorDriverWarehouses {
-  id             Int       @id @default(autoincrement())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime
-  deletedAt      DateTime?
-  vendorDriverId Int
-  warehouseId    Int
-
-  @@index([vendorDriverId])
-  @@index([warehouseId])
-}
-
-model VendorDrivers {
-  id             Int                          @id @default(autoincrement())
-  createdAt      DateTime                     @default(now())
-  updateAt       DateTime
-  deletedAt      DateTime?
-  stationId      Int?
-  isFired        Boolean                      @default(false)
-  activityStatus VendorDrivers_activityStatus
-  hiredDate      DateTime
-  userId         Int                          @unique
-  roleId         Int
-  warehouseId    Int?
-  address        String
-  staffIdNumber  String
-  vendorId       Int?
-
-  @@index([roleId])
-  @@index([userId])
-  @@index([vendorId])
 }
 
 enum EmployeeStatus {
@@ -747,20 +791,13 @@ enum Employee_activityStatus {
   TERMINATED
 }
 
-enum Order_paymentMethod {
-  CASH
-  CHAPA
-}
-
-enum VendorDrivers_activityStatus {
-  ASSIGNED
-  UNASSIGNED
-  SUSPENDED
-  TERMINATED
-}
-
-enum Vendor_vendorType {
+enum VendorType {
   WAREHOUSE
   VEHICLE_OWNERS
   VEHICLE_OPERATORS
+}
+
+enum PaymentMethod {
+  CASH
+  CHAPA
 }
