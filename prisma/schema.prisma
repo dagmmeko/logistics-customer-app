@@ -10,19 +10,20 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
   userName      String?
-  phoneNumber   String?   @unique
-  email         String    @unique
+  phoneNumber   String?        @unique
+  email         String         @unique
   isEmployee    Boolean
-  createdAt     DateTime  @default(now())
-  updateAt      DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updateAt      DateTime       @updatedAt
   deletedAt     DateTime?
   jwtPassword   String?
   twoFAPassword String?
-  twoFARequired Boolean   @default(false)
+  twoFARequired Boolean        @default(false)
   Employee      Employee?
   Customer      Customer?
+  DriverRating  DriverRating[]
 
   @@fulltext([userName, phoneNumber, email])
 }
@@ -118,21 +119,23 @@ model Fired {
 }
 
 model Customer {
-  id              Int           @id @default(autoincrement())
-  userId          Int           @unique
+  id              Int            @id @default(autoincrement())
+  userId          Int            @unique
   customerType    CustomerType?
   premium         Boolean?
   physicalAddress String?
   mapAddress      String?
-  createdAt       DateTime      @default(now())
-  updateAt        DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updateAt        DateTime       @updatedAt
   deletedAt       DateTime?
   companyName     String?
   tinNumber       String?
-  User            User          @relation(fields: [userId], references: [id])
-  SentOrders      Order[]       @relation("order sender")
-  ReceivedOrders  Order[]       @relation("order receiver")
+  User            User           @relation(fields: [userId], references: [id])
+  SentOrders      Order[]        @relation("order sender")
+  ReceivedOrders  Order[]        @relation("order receiver")
   Tickets         Ticket[]
+  OrderRating     OrderRating[]
+  DriverRating    DriverRating[]
 }
 
 model Role {
@@ -188,10 +191,49 @@ model Order {
   Tracker                 Tracker?
   Inventory               Inventory?
   OrderDispatch           OrderDispatch[]
+  OrderRating             OrderRating[]
+  DriverRating            DriverRating[]
 
   @@index([senderCustomerId])
   @@index([receiverCustomerId])
   @@index([dispatchId])
+}
+
+model OrderRating {
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updateAt   DateTime  @updatedAt
+  deletedAt  DateTime?
+  orderId    Int
+  comment    String?
+  customerId Int?
+  Customer   Customer? @relation(fields: [customerId], references: [id])
+  rating     Int
+  Order      Order     @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([customerId])
+}
+
+model DriverRating {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  deletedAt DateTime?
+  userId    Int
+  comment   String?
+  orderId   Int
+
+  rating     Int
+  customerId Int?
+  Order      Order @relation(fields: [orderId], references: [id])
+
+  User     User      @relation(fields: [userId], references: [id])
+  Customer Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([userId])
+  @@index([customerId])
+  @@index([orderId])
 }
 
 model OrderMilestone {

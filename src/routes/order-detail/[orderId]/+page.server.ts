@@ -1,5 +1,20 @@
 import { prisma } from "$lib/utils/prisma.js";
-import { error, redirect } from "@sveltejs/kit";
+import { redirect } from "@sveltejs/kit";
+import { superValidate } from "sveltekit-superforms/server";
+import { z } from "zod";
+
+const addOrderRatingSchema = z.object({
+  comment: z.string(),
+  rating: z.number(),
+  customerId: z.number(),
+});
+
+const addDriverRatingSchema = z.object({
+  comment: z.string(),
+  rating: z.number(),
+  driverUserId: z.number(),
+  customerId: z.number(),
+});
 
 export const load = async (event) => {
   if (!event.params.orderId) {
@@ -21,6 +36,24 @@ export const load = async (event) => {
           User: true,
         },
       },
+      OrderRating: {
+        include: {
+          Customer: {
+            include: {
+              User: true,
+            },
+          },
+        },
+      },
+      DriverRating: {
+        include: {
+          Customer: {
+            include: {
+              User: true,
+            },
+          },
+        },
+      },
       orderMilestone: true,
       Tracker: true,
       Dispatch: {
@@ -39,13 +72,66 @@ export const load = async (event) => {
           },
         },
       },
+      OrderDispatch: {
+        include: {
+          Dispatch: {
+            include: {
+              AssignedTo: {
+                include: {
+                  User: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
-  //
-  console.log(orderDetail);
 
   if (orderDetail?.orderStatus === "UNCLAIMED" || !orderDetail?.paymentStatus) {
     throw redirect(302, `/finalize-order/${orderDetail?.id}`);
   }
-  return { orderDetail };
+
+  const addOrderRatingForm = await superValidate(addOrderRatingSchema);
+
+  const addDriverRatingForm = await superValidate(addDriverRatingSchema);
+  return { orderDetail, addOrderRatingForm, addDriverRatingForm };
+};
+
+export const actions = {
+  addOrderRating: async (event) => {
+    const addOrderRatingForm = await superValidate(
+      event.request,
+      addOrderRatingSchema
+    );
+
+    const createOrderRating = await prisma.orderRating.create({
+      data: {
+        comment: addOrderRatingForm.data.comment,
+        rating: addOrderRatingForm.data.rating,
+        orderId: Number(event.params.orderId),
+        customerId: addOrderRatingForm.data.customerId,
+      },
+    });
+
+    return { addOrderRatingForm, createOrderRating };
+  },
+  addDriverRating: async (event) => {
+    const addDriverRatingForm = await superValidate(
+      event.request,
+      addDriverRatingSchema
+    );
+
+    const createDriverRating = await prisma.driverRating.create({
+      data: {
+        userId: addDriverRatingForm.data.driverUserId,
+        comment: addDriverRatingForm.data.comment,
+        rating: addDriverRatingForm.data.rating,
+        customerId: addDriverRatingForm.data.customerId,
+        orderId: Number(event.params.orderId),
+      },
+    });
+
+    return { addDriverRatingForm, createDriverRating };
+  },
 };
