@@ -50,7 +50,8 @@
   </a>
   <div class="my-4">
     {#each data.tickets as ticket}
-      <div
+      <a
+        href="/support/{ticket.id}"
         class="bg-tableHeaderBg/50 shadow-sm w-auto rounded-md p-4 my-2 grid"
       >
         <div class="text-gray7 text-xs">Ticket ID: {ticket.id}</div>
@@ -85,7 +86,7 @@
           <p class="font-medium">Description</p>
 
           <p class=" text-sm font-normal line-clamp-3">
-            {ticket.description && "No Description"}
+            {ticket.description || "No Description"}
           </p>
         </div>
         {#if ticket.resolution !== null}
@@ -95,7 +96,7 @@
             <p>{ticket.resolution}</p>
           </div>
         {/if}
-      </div>
+      </a>
     {/each}
   </div>
 </div>

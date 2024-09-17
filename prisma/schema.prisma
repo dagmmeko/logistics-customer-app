@@ -24,6 +24,7 @@ model User {
   Employee      Employee?
   Customer      Customer?
   DriverRating  DriverRating[]
+  Comments      Comments[]
 
   @@fulltext([userName, phoneNumber, email])
 }
@@ -464,11 +465,27 @@ model Ticket {
   CreatedBy          Employee?      @relation("Ticket Created By", fields: [creatorEmployeeId], references: [id])
   Customer           Customer       @relation(fields: [customerId], references: [id])
   TicketFile         TicketFile[]
+  Comments           Comments[]
 
   @@index([warehouseId])
   @@index([assignedEmployeeId])
   @@index([creatorEmployeeId])
   @@index([customerId])
+}
+
+model Comments {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
+  text      String
+  userId    Int
+  ticketId  Int
+  User      User      @relation(fields: [userId], references: [id])
+  Ticket    Ticket    @relation(fields: [ticketId], references: [id])
+
+  @@index([userId])
+  @@index([ticketId])
 }
 
 model File {
