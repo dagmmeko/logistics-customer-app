@@ -137,7 +137,7 @@
 <div id="map" class="w-full h-72" />
 <input
   id="pac-input"
-  class="w-full control p-3 text-sm mt-4 rounded"
+  class="w-full control p-3 text-sm mt-4 rounded border-b-2 border-complementary"
   type="text"
   placeholder="Bole, Merkato, ...."
 />

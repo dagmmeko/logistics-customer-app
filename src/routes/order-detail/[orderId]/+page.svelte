@@ -76,15 +76,15 @@
 </script>
 
 <div class=" mt-8 mb-16 grid mx-6">
-  <div class="flex justify-center">
-    <!-- <Barcode
+  <!-- <div class="flex justify-center">
+    <Barcode
       value={data.orderDetail?.id}
       elementTag={"canvas"}
       options={{
         format: "CODE128",
         width: 4,
-        height: 100,
-        text: "Order ",
+        height: 60,
+        text: `${data.orderDetail.id}`,
         textAlign: "center",
         textPosition: "bottom",
         textMargin: 2,
@@ -92,8 +92,8 @@
         background: "#ffffff",
         lineColor: "#000000",
       }}
-    /> -->
-  </div>
+    />
+  </div> -->
 
   <div class="grid grid-cols-2 gap-2 my-4">
     <button
@@ -109,72 +109,17 @@
       Rate Courier
     </button>
   </div>
-
-  {#if data.orderDetail?.orderStatus !== "COMPLETED"}
-    <div class="bg-tableHeaderBg max-w-sm w-96 p-4 my-4 rounded-md shadow-md">
-      <p>Milestones</p>
-      {#if data.orderDetail}
-        {#each data.orderDetail.orderMilestone as milestone}
-          <div class="grid">
-            <label>
-              <input
-                disabled
-                checked={milestone.isCompleted}
-                type="checkbox"
-                class="mr-2"
-                name="milestones"
-              />{milestone.description}
-            </label>
-          </div>
-        {/each}
-      {/if}
-    </div>
-  {/if}
-
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <span class="font-semibold text-lg">To</span>
-    <div class="text-primary font-light">
-      {data.orderDetail?.receiverName
-        ? data.orderDetail?.receiverName
-        : data.orderDetail?.Receiver?.User.userName || ""}
-    </div>
-    <div class="font-light mt-1">
-      {data.orderDetail?.receiverEmail
-        ? data.orderDetail?.receiverEmail
-        : data.orderDetail?.Receiver?.User.email || ""}
-    </div>
-    <div class="font-light mt-1">
-      {data.orderDetail?.receiverPhoneNumber
-        ? data.orderDetail?.receiverPhoneNumber
-        : data.orderDetail?.Receiver?.User.phoneNumber || ""}
-    </div>
-  </div>
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <span class="font-semibold text-lg">Current Driver</span>
-    <div class="text-primary font-light">
-      {data.orderDetail?.Dispatch?.AssignedTo.User.userName ?? ""}
-    </div>
-    <div class="font-light mt-1">
-      {data.orderDetail?.Dispatch?.AssignedTo.User.phoneNumber ?? ""}
-    </div>
-  </div>
-  {#each data.orderDetail.OrderRating as rating}
-    <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-      <StarRating rating={rating.rating} />
-      <p>{rating.comment}</p>
-      <p>{rating.Customer?.User.userName}</p>
-    </div>
-  {/each}
-
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <div class="flex justify-between">
-      <span class="font-semibold text-lg">Order Detail</span>
+  <div
+    class="bg-primary/10 p-4 my-4 rounded-md shadow-md border-[1px] border-primary/50"
+  >
+    <div class="flex justify-between items-center">
+      <span class="font-semibold text-xl text-primary">Order Detail</span>
       <span
-        class="text-sm font-medium text-white mt-1 ml-6 border-secondary border-[1px] bg-secondary/60 px-2 py-1 rounded-md"
+        class="text-xs font-medium text-white mt-1 ml-6 border-secondary border-[1px] bg-secondary/60 px-2 py-1 rounded-md"
         >{data.orderDetail?.orderStatus}
       </span>
     </div>
-    <div class="mt-4">
+    <div class="bg-white p-1 rounded-md shadow-sm mt-4">
       <GoogleMaps
         display={true}
         destinationLat={Number(destinationLat)}
@@ -184,55 +129,90 @@
         deliveryLat={Number(deliveryLat)}
         deliveryLng={Number(deliveryLng)}
       />
-      <div class="font-semibold w-full text-lg mt-4">Pick Up</div>
-
-      <div class="mt-2">
-        <span class="font-semibold">Location:</span>{data.orderDetail
-          ?.pickUpPhysicalLocation}
+    </div>
+    <div class="mt-4">
+      <div class="flex items-center">
+        <span class="font-semibold text-lg mr-4 text-tertiary">To</span>
+        <div class="text-primary font-light">
+          {data.orderDetail?.receiverName
+            ? data.orderDetail?.receiverName
+            : data.orderDetail?.Receiver?.User.userName || ""} | {data
+            .orderDetail?.receiverPhoneNumber
+            ? data.orderDetail?.receiverPhoneNumber
+            : data.orderDetail?.Receiver?.User.phoneNumber || ""}
+        </div>
       </div>
-      <div class="mt-2">
-        <span class="font-semibold">Time:</span>
+      <span class="font-semibold w-full text-lg mt-2 text-tertiary"
+        >Pick Up</span
+      >
+      <div class="">
+        {data.orderDetail?.pickUpPhysicalLocation} -
         {dayjs(data.orderDetail?.pickUpTime).format("MMM DD/YY ")}
       </div>
-      <div class="font-semibold text-lg mt-4">Drop Off</div>
+      <span class="font-semibold text-lg mt-2 text-tertiary">Drop Off</span>
 
-      <div class="mt-2">
-        <span class="font-semibold">Location:</span>
-        {data.orderDetail?.dropOffPhysicalLocation}
-      </div>
-      <div class="mt-2">
-        <span class="font-semibold"> Time:</span>
+      <div class="">
+        {data.orderDetail?.dropOffPhysicalLocation} -
         {dayjs(data.orderDetail?.dropOffTime).format("MMM DD/YY")}
       </div>
+      <span class="font-semibold text-lg text-tertiary">Payment</span>
+      <div class="">
+        <span class="font-semibold">Amount:</span>
+        {data.orderDetail?.paymentAmount}
+
+        <span class="font-semibold">Method:</span>
+        {data.orderDetail?.paymentMethod} -
+        {dayjs(data.orderDetail?.paymentDate).format("MMM DD/YY")}
+      </div>
     </div>
   </div>
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <span class="font-semibold text-lg">Payment</span>
-    <div class="mt-2">
-      <span class="font-semibold">Amount:</span>
-      {data.orderDetail?.paymentAmount}
-    </div>
-    <div class="mt-2">
-      <span class="font-semibold">Payment Method:</span>
-      {data.orderDetail?.paymentMethod}
-    </div>
-    <div class="mt-2">
-      <span class="font-semibold">Payment Date:</span>
-      {dayjs(data.orderDetail?.paymentDate).format("DD-MM-YYYY")}
-    </div>
-  </div>
-  <div class="bg-tableHeaderBg p-4 my-4 rounded-md shadow-md">
-    <span class="font-semibold text-lg"> All Drivers </span>
-    <div>
-      {#each data.orderDetail.OrderDispatch as ds}
-        UsrId: {ds.Dispatch.AssignedTo.User.id} - EmpId: {ds.Dispatch.AssignedTo
-          .id} - Name: {ds.Dispatch.AssignedTo.User.userName}
-        rating-
-        {data.orderDetail.DriverRating.find(
-          (rating) => rating.userId === ds.Dispatch.AssignedTo.User.id
-        )?.rating || "No rating"}
+
+  <div
+    class="bg-primary/10 max-w-sm w-96 p-4 my-4 rounded-md shadow-md border-[1px] border-primary/50"
+  >
+    <p class="font-semibold text-lg text-primary">Milestones</p>
+    {#if data.orderDetail}
+      {#each data.orderDetail.orderMilestone as milestone}
+        <div class="grid">
+          <label>
+            <input
+              disabled
+              checked={milestone.isCompleted}
+              type="checkbox"
+              class="mr-2"
+              name="milestones"
+            />{milestone.description}
+          </label>
+        </div>
       {/each}
+    {/if}
+  </div>
+  {#if data.orderDetail?.Dispatch?.AssignedTo}
+    <div
+      class="bg-primary/10 border-[1px] border-primary/50 p-4 my-4 rounded-md shadow-md"
+    >
+      <span class="font-semibold text-lg text-primary">Current Driver</span>
+      <div class="text-primary font-light">
+        {data.orderDetail?.Dispatch?.AssignedTo.User.userName ?? ""}
+      </div>
+      <div class="font-light mt-1">
+        {data.orderDetail?.Dispatch?.AssignedTo.User.phoneNumber ?? ""}
+      </div>
     </div>
+  {/if}
+  <div
+    class="bg-primary/10 border-[1px] border-primary/50 p-4 my-4 rounded-md shadow-md grid gap-2"
+  >
+    <span class="font-semibold text-lg text-primary"> Order Ratings </span>
+    {#each data.orderDetail.OrderRating as rating}
+      <div>
+        <p class="font-semibold text-tertiary">
+          {rating.Customer?.User.userName}
+        </p>
+        <StarRating rating={rating.rating} />
+        <p>{rating.comment}</p>
+      </div>
+    {/each}
   </div>
 </div>
 

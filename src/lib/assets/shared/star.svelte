@@ -6,8 +6,8 @@
 
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  width="32"
-  height="31"
+  width="16"
+  height="15"
   viewBox="0 0 51 48"
   class="star"
   on:mouseover
@@ -30,9 +30,9 @@
   }
   .starPath {
     fill: none;
-    stroke: #999;
+    stroke: rgba(110, 79, 0, 0.3);
   }
   .filled {
-    fill: yellow;
+    fill: rgb(245, 175, 0);
   }
 </style>

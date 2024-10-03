@@ -20,9 +20,20 @@
   $: form?.addTicketForm ? goto("/support") : null;
 </script>
 
-<div class="mx-6 my-10">
-  <p class="text-2xl font-light mb-6">Report Issue Form</p>
-  <form method="post" action="?/createTicket" use:enhance class=" grid gap-6">
+<div class="mx-8 my-6">
+  <div class="mb-4">
+    <h1 class="text-2xl font-semibold mb-1">Report Issue Form</h1>
+    <p class="mt-2 text-sm text-gray7">
+      Please fill out the form below to report an issue. Our support team will
+      get back to you as soon as possible.
+    </p>
+  </div>
+  <form
+    method="post"
+    action="?/createTicket"
+    use:enhance
+    class=" grid gap-6 mt-6"
+  >
     <label>
       <div class="label">
         Title <span class="text-red-700 text-xs">*required</span>
@@ -64,7 +75,6 @@
           }
         }}
       />
-      <hr class="my-6" />
 
       <div
         class="flex bg-primary rounded-lg min-w-fit max-w-0 gap-2 items-center justify-center px-6 shadow-md py-2"

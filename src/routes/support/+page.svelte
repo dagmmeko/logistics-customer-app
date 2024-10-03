@@ -35,7 +35,7 @@
         class="bg-primary/10 shadow-md w-auto rounded-md p-4 grid"
       >
         <div class="flex items-center justify-between gap-4">
-          <span class=" text-lg text-orderCardText font-medium">
+          <span class=" text-lg text-tertiary font-medium">
             <span class="font-semibold"> ID {ticket.id}: </span>
             {ticket.title}</span
           >
@@ -49,7 +49,7 @@
           {#if ticket.AssignedTo !== null}
             <div class="flex items-center">
               <p class="text-xs text-gray7">Assigned To</p>
-              <p class="text-xs text-secondary font-medium ml-1">
+              <p class="text-xs text-primary font-medium ml-1">
                 {ticket.AssignedTo?.User.userName}
               </p>
             </div>
@@ -57,7 +57,7 @@
           {#if ticket.dueDate}
             <div class="flex items-center">
               <p class="text-xs text-gray7">Due Date:</p>
-              <p class="text-xs text-secondary font-medium ml-1">
+              <p class="text-xs text-primary font-medium ml-1">
                 {dayjs(ticket.dueDate).format("DD MM YY")}
               </p>
             </div>
