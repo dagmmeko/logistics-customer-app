@@ -30,7 +30,7 @@
   }
   .starPath {
     fill: none;
-    stroke: rgba(110, 79, 0, 0.3);
+    stroke: rgb(69, 49, 0);
   }
   .filled {
     fill: rgb(245, 175, 0);

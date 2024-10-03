@@ -168,7 +168,7 @@
   </div>
 
   <div
-    class="bg-primary/10 max-w-sm w-96 p-4 my-4 rounded-md shadow-md border-[1px] border-primary/50"
+    class="bg-primary/10 p-4 my-4 rounded-md shadow-md border-[1px] border-primary/50"
   >
     <p class="font-semibold text-lg text-primary">Milestones</p>
     {#if data.orderDetail}
@@ -262,11 +262,11 @@
   >
     <div
       use:clickOutside={() => (driverRateModal = false)}
-      class="bg-white mx-auto my-16 rounded-xl p-8 w-[360px] grid gap-4 justify-items-stretch"
+      class="bg-white mx-auto my-16 rounded-md p-8 w-[360px] grid gap-4 justify-items-stretch"
     >
       <form use:addDriverRatingEnhance method="post" action="?/addDriverRating">
         <div class="text-center text-xl font-semibold">
-          Rate Order Experience
+          Rate Driver Experience
         </div>
         <hr class="my-4" />
         <label>
@@ -284,7 +284,10 @@
             {/each}
           </select>
         </label>
-        <div class="flex justify-center my-4">
+        <div
+          class=" bg-tertiary/10 my-4 border-[1px] p-2 border-tertiary rounded-md"
+        >
+          <span class="text-primary"> Rate </span>
           <StarRating bind:rating={ratingDriver} />
         </div>
         <div class="">
