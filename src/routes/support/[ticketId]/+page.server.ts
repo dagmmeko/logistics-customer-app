@@ -69,11 +69,21 @@ export const actions = {
         },
         data: {
           reOpened: true,
+          ticketStatus: "ASSIGNED",
         },
       });
     }
 
-    const createComment = "";
+    let createComment;
+    if (addTicketCommentForm.data.text) {
+      createComment = await prisma.comments.create({
+        data: {
+          text: addTicketCommentForm.data.text,
+          userId: session?.userData.id,
+          ticketId: Number(event.params.ticketId),
+        },
+      });
+    }
 
     return {
       createComment,
