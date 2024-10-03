@@ -620,6 +620,7 @@ model Ticket {
   creatorEmployeeId  Int?
   warehouseId        Int?
   resolution         String?
+  reOpened           Boolean        @default(false)
   ticketSeverity     SeverityStatus @default(LOW)
   ticketFiles        String?
   Warehouse          Warehouse?     @relation(fields: [warehouseId], references: [id])

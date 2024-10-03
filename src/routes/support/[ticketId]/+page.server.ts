@@ -4,7 +4,8 @@ import { superValidate } from "sveltekit-superforms/server";
 import { z } from "zod";
 
 const addTicketCommentSchema = z.object({
-  text: z.string(),
+  text: z.string().optional(),
+  reopen: z.boolean(),
 });
 
 export const load = async (event) => {
@@ -59,13 +60,20 @@ export const actions = {
       return fail(401, { errorMessage: "Unauthorized" });
     }
 
-    const createComment = await prisma.comments.create({
-      data: {
-        text: addTicketCommentForm.data.text,
-        userId: session?.userData.id,
-        ticketId: Number(event.params.ticketId),
-      },
-    });
+    console.log("here", addTicketCommentForm.data.reopen);
+    if (addTicketCommentForm.data.reopen) {
+      console.log("Reopen ticket");
+      await prisma.ticket.update({
+        where: {
+          id: Number(event.params.ticketId),
+        },
+        data: {
+          reOpened: true,
+        },
+      });
+    }
+
+    const createComment = "";
 
     return {
       createComment,
